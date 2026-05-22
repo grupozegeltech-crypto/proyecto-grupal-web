@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LavaExpress Lima - Servicio de Lavandería Profesional</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-soap logo-icon"></i>
+                <h2>LavaExpress <span>Lima</span></h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="#inicio"><i class="fas fa-home"></i> Inicio</a>
+                <a href="#" id="openNosotrosBtn"><i class="fas fa-user-friends"></i> Nosotros</a>
+                <a href="#servicios"><i class="fas fa-concierge-bell"></i> Servicios</a>
+                <a href="#contacto"><i class="fas fa-envelope"></i> Contacto</a>
+            </nav>
+            <button id="toggleAdminBtn" class="btn-admin-nav"><i class="fas fa-lock"></i> Personal</button>
+        </div>
+    </header>
+
+    <section id="inicio" class="hero-section">
+        <div class="hero-content">
+            <h1>Tu ropa impecable, <br>sin moverte de casa</h1>
+            <p>Lavandería tradicional con tecnología en tiempo real. Cuidamos tus prendas con la máxima dedicación y puntualidad.</p>
+            <a href="#rastreo" class="btn-hero"><i class="fas fa-search"></i> Rastrear mi Pedido</a>
+        </div>
+    </section>
+
+    <main class="main-container">
+
+        <section id="rastreo" class="card search-section animate-card">
+            <div class="card-header">
+                <div class="circle-icon"><i class="fas fa-route"></i></div>
+                <div>
+                    <h3>Seguimiento Digital</h3>
+                    <p>Consulta el estado de tus prendas al instante</p>
+                </div>
+            </div>
+            
+            <div class="search-box">
+                <div class="input-wrapper">
+                    <i class="fas fa-ticket-alt input-icon"></i>
+                    <input type="text" id="ticketInput" placeholder="Introduce tu N° de Ticket o DNI (Ej: T-100)">
+                </div>
+                <button id="btnBuscar" class="btn-search"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+
+            <div id="trackerContainer" class="tracker-container hidden">
+                <div class="ticket-info">
+                    <p><i class="fas fa-user"></i> <strong>Cliente:</strong> <span id="lblCliente">...</span></p>
+                    <p><i class="fas fa-receipt"></i> <strong>Código de Orden:</strong> <span id="lblTicket">...</span></p>
+                </div>
+
+                <div class="progress-track">
+                    <div class="step" id="step-recibido">
+                        <div class="icon-wrap"><i class="fas fa-box"></i></div>
+                        <span class="text">Recibido</span>
+                    </div>
+                    <div class="step" id="step-lavando">
+                        <div class="icon-wrap"><i class="fas fa-water"></i></div>
+                        <span class="text">En Lavado / Secado</span>
+                    </div>
+                    <div class="step" id="step-listo">
+                        <div class="icon-wrap"><i class="fas fa-star"></i></div>
+                        <span class="text">Listo para Entrega</span>
+                    </div>
+                </div>
+            </div>
+            
+            <p id="errorCliente" class="error-msg hidden"><i class="fas fa-exclamation-circle"></i> No se encontró ningún pedido con ese código. Verifica e intenta de nuevo.</p>
+        </section>
+
+        <section id="servicios" class="services-grid">
+            <div class="service-item">
+                <i class="fas fa-wind text-primary"></i>
+                <h4>Lavado Ecológico</h4>
+                <p>Utilizamos insumos biodegradables que cuidan tus telas y el medio ambiente.</p>
+            </div>
+            <div class="service-item">
+                <i class="fas fa-shipping-fast text-primary"></i>
+                <h4>Delivery Express</h4>
+                <p>Recogemos y entregamos tus prendas en la puerta de tu hogar o departamento.</p>
+            </div>
+            <div class="service-item">
+                <i class="fas fa-clock text-primary"></i>
+                <h4>Puntualidad</h4>
+                <p>Cumplimos estrictamente con los tiempos fijados. Tu ropa lista cuando la necesitas.</p>
+            </div>
+        </section>
+
+        <section id="adminPanelSection" class="card admin-section hidden animate-card">
+            <div class="card-header admin-header">
+                <div class="circle-icon admin-icon"><i class="fas fa-user-shield"></i></div>
+                <div>
+                    <h3>Panel de Control Interno</h3>
+                    <p>Uso exclusivo para el personal de LavaExpress Lima</p>
+                </div>
+            </div>
+
+            <form id="adminForm" class="admin-form">
+                <div class="input-wrapper">
+                    <i class="fas fa-hashtag input-icon"></i>
+                    <input type="text" id="adminTicket" placeholder="Código de Ticket (Ej: T-100)" required>
+                </div>
+                <div class="input-wrapper">
+                    <i class="fas fa-id-card input-icon"></i>
+                    <input type="text" id="adminNombre" placeholder="Nombre completo del Cliente" required>
+                </div>
+                <div class="input-wrapper">
+                    <i class="fas fa-bars-staggered input-icon"></i>
+                    <select id="adminEstado">
+                        <option value="recibido">📦 Recibido (Prendas en almacén)</option>
+                        <option value="lavando">🧼 En proceso de Lavado / Secado</option>
+                        <option value="listo">✨ ¡Listo para Entrega / Delivery!</option>
+                    </select>
+                </div>
+                <button type="submit" id="btnRegistrar" class="btn-admin"><i class="fas fa-save"></i> Registrar / Actualizar Estado</button>
+            </form>
+            <p id="successAdmin" class="success-msg hidden"><i class="fas fa-check-double"></i> ¡Información sincronizada con Firebase de forma exitosa!</p>
+        </section>
+
+    </main>
+
+    <div id="nosotrosModal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <button id="closeNosotrosBtn" class="modal-close-btn">&times;</button>
+            <div class="modal-body">
+                <div class="modal-icon"><i class="fas fa-user-friends"></i></div>
+                <h3>¿Quiénes Somos?</h3>
+                <div class="pitch-line"></div>
+                
+                <p class="pitch-text">
+                    ¿Sabías que una familia promedio pierde más de <strong>10 horas a la semana</strong> lavando, secando y planchando ropa, o estresándose por teléfono para saber si su pedido ya está listo? 
+                </p>
+                <p class="pitch-text">
+                    En <strong>LavaExpress Lima</strong> nacimos para devolverte tu tiempo. Somos una lavandería tradicional impulsada por tecnología, donde combinamos el cuidado artesanal y minucioso de tus prendas con un sistema de <strong>rastreo digital en tiempo real</strong>. 
+                </p>
+                <p class="pitch-text">
+                    No somos solo una lavandería a domicilio; somos la tranquilidad de saber exactamente dónde está tu ropa con un solo clic. Nos encargamos del trabajo pesado con insumos ecológicos para que tú te enfoques en lo que verdaderamente importa. <strong>¡Tu ropa impecable, tu vida simple!</strong>
+                </p>
+                
+                <button id="modalActionBtn" class="btn-hero" style="margin-top: 15px; width: 100%;">¡Excelente!</button>
+            </div>
+        </div>
+    </div>
+
+    <footer id="contacto">
+        <div class="footer-content">
+            <div class="footer-info">
+                <h4>LavaExpress Lima</h4>
+                <p><i class="fas fa-map-marker-alt"></i> Sede Central: Lima Norte, Comas</p>
+                <p><i class="fas fa-phone-alt"></i> Telf: (01) 485-9632</p>
+            </div>
+            <div class="footer-rights">
+                <p>&copy; 2026 LavaExpress Lima. Desarrollado por la Facultad de Tecnología.</p>
+            </div>
+        </div>
+    </footer>
+
+    <a href="https://wa.me/51999999999?text=Hola%20LavaExpress,%20deseo%20solicitar%20un%20servicio%20a%20domicilio" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

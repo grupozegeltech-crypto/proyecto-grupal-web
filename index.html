@@ -13,7 +13,7 @@
         <div class="nav-container">
             <div class="logo">
                 <i class="fas fa-soap logo-icon"></i>
-                <h2>LavaExpress <span>Lima</span></h2>
+                <h3>LavaExpress <span>Lima</span></h3>
             </div>
             <nav class="nav-menu">
                 <a href="#inicio"><i class="fas fa-home"></i> Inicio</a>
@@ -21,7 +21,7 @@
                 <a href="#servicios"><i class="fas fa-concierge-bell"></i> Servicios</a>
                 <a href="#contacto"><i class="fas fa-envelope"></i> Contacto</a>
             </nav>
-            <button id="toggleAdminBtn" class="btn-admin-nav"><i class="fas fa-lock"></i> Personal</button>
+            <button id="toggleAdminBtn" class="btn-admin-nav"><i class="fas fa-lock"></i> Administrador </button>
         </div>
     </header>
 
@@ -58,18 +58,22 @@
                     <p><i class="fas fa-receipt"></i> <strong>Código de Orden:</strong> <span id="lblTicket">...</span></p>
                 </div>
 
-                <div class="progress-track">
+                <div class="progress-track" style="display: flex; justify-content: space-between;">
                     <div class="step" id="step-recibido">
                         <div class="icon-wrap"><i class="fas fa-box"></i></div>
                         <span class="text">Recibido</span>
                     </div>
                     <div class="step" id="step-lavando">
-                        <div class="icon-wrap"><i class="fas fa-water"></i></div>
-                        <span class="text">En Lavado / Secado</span>
+                        <div class="icon-wrap"><i class="fas fa-soap"></i></div>
+                        <span class="text">En Lavado</span>
+                    </div>
+                    <div class="step" id="step-secando">
+                        <div class="icon-wrap"><i class="fas fa-wind"></i></div>
+                        <span class="text">Secado / Doblado</span>
                     </div>
                     <div class="step" id="step-listo">
                         <div class="icon-wrap"><i class="fas fa-star"></i></div>
-                        <span class="text">Listo para Entrega</span>
+                        <span class="text">Listo</span>
                     </div>
                 </div>
             </div>
@@ -104,25 +108,35 @@
                 </div>
             </div>
 
-            <form id="adminForm" class="admin-form">
-                <div class="input-wrapper">
-                    <i class="fas fa-hashtag input-icon"></i>
-                    <input type="text" id="adminTicket" placeholder="Código de Ticket (Ej: T-100)" required>
+            <div class="admin-form">
+                <div class="input-wrapper" style="display: flex; gap: 10px; background: transparent; padding: 0; box-shadow: none;">
+                    <div class="input-wrapper" style="flex: 1; margin: 0;">
+                        <i class="fas fa-hashtag input-icon"></i>
+                        <input type="text" id="adminTicket" placeholder="Código de Ticket (Ej: T-100)">
+                    </div>
+                    <button type="button" id="btnCargarTicket" class="btn-search" style="padding: 0 20px; height: 50px; font-size: 14px;"><i class="fas fa-search"></i> Buscar</button>
                 </div>
+
                 <div class="input-wrapper">
                     <i class="fas fa-id-card input-icon"></i>
-                    <input type="text" id="adminNombre" placeholder="Nombre completo del Cliente" required>
+                    <input type="text" id="adminNombre" placeholder="Nombre completo del Cliente">
                 </div>
+
                 <div class="input-wrapper">
                     <i class="fas fa-bars-staggered input-icon"></i>
                     <select id="adminEstado">
                         <option value="recibido">📦 Recibido (Prendas en almacén)</option>
-                        <option value="lavando">🧼 En proceso de Lavado / Secado</option>
+                        <option value="lavando">🧼 En proceso de Lavado</option>
+                        <option value="secando">💨 En proceso de Secado / Doblado</option>
                         <option value="listo">✨ ¡Listo para Entrega / Delivery!</option>
                     </select>
                 </div>
-                <button type="submit" id="btnRegistrar" class="btn-admin"><i class="fas fa-save"></i> Registrar / Actualizar Estado</button>
-            </form>
+
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px;">
+                    <button type="button" id="btnRegistrar" class="btn-admin" style="flex: 1; min-width: 150px;"><i class="fas fa-user-plus"></i> Registrar Nuevo</button>
+                    <button type="button" id="btnActualizar" class="btn-admin" style="flex: 1; min-width: 150px; background-color: #2ecc71;"><i class="fas fa-sync-alt"></i> Actualizar Proceso</button>
+                </div>
+            </div>
             <p id="successAdmin" class="success-msg hidden"><i class="fas fa-check-double"></i> ¡Información sincronizada con Firebase de forma exitosa!</p>
         </section>
 

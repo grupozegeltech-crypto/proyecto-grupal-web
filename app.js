@@ -1,154 +1,1226 @@
-// Importamos los módulos necesarios de Firebase Web SDK
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    collection,
+    getDocs,
+    query,
+    where,
+    addDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// Tus credenciales exactas proporcionadas
 const firebaseConfig = {
-  apiKey: "AIzaSyA_W8I3jAlW6jIxfW2MrhpX9kVgtaZ6-kQ",
-  authDomain: "lavaexpress-lima.firebaseapp.com",
-  projectId: "lavaexpress-lima",
-  storageBucket: "lavaexpress-lima.firebasestorage.app",
-  messagingSenderId: "1028137831114",
-  appId: "1:1028137831114:web:ebecf5c5d7a32266db0233"
+    apiKey: "AIzaSyA_W8I3jAlW6jIxfW2MrhpX9kVgtaZ6-kQ",
+    authDomain: "lavaexpress-lima.firebaseapp.com",
+    projectId: "lavaexpress-lima",
+    storageBucket: "lavaexpress-lima.firebasestorage.app",
+    messagingSenderId: "1028137831114",
+    appId: "1:1028137831114:web:ebecf5c5d7a32266db0233"
 };
 
-// Inicializamos Firebase y Firestore
 const app = initializeApp(firebaseConfig);
+
 const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-// ELEMENTOS DE LA INTERFAZ (VISTA CLIENTE)
-const ticketInput = document.getElementById('ticketInput');
-const btnBuscar = document.getElementById('btnBuscar');
-const trackerContainer = document.getElementById('trackerContainer');
-const errorCliente = document.getElementById('errorCliente');
-const lblCliente = document.getElementById('lblCliente');
-const lblTicket = document.getElementById('lblTicket');
+document.addEventListener('DOMContentLoaded', () => {
 
-const stepRecibido = document.getElementById('step-recibido');
-const stepLavando = document.getElementById('step-lavando');
-const stepListo = document.getElementById('step-listo');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnHacerPedido = document.getElementById('btnHacerPedido');
+    const btnBuscar = document.getElementById('btnBuscar');
+    const btnLogout = document.getElementById('btnLogout');
+    const btnMiPedido = document.getElementById('btnMiPedido');
+    const btnModificarPedido = document.getElementById('btnModificarPedido');
+    const btnDetallePedido = document.getElementById('btnDetallePedido');
+    const userName = document.getElementById('userName');
 
-// ELEMENTOS DE LA INTERFAZ (VISTA ADMINISTRADOR)
-const adminForm = document.getElementById('adminForm');
-const adminTicket = document.getElementById('adminTicket');
-const adminNombre = document.getElementById('adminNombre');
-const adminEstado = document.getElementById('adminEstado');
-const successAdmin = document.getElementById('successAdmin');
+    onAuthStateChanged(auth, async (user) => {
 
-// --- LÓGICA 1: BUSCAR TICKET (CLIENTE) ---
-btnBuscar.addEventListener('click', async () => {
-    const idTicket = ticketInput.value.trim().toUpperCase();
-    
-    if (idTicket === "") return;
+        if (user) {
 
-    errorCliente.classList.add('hidden');
-    trackerContainer.classList.add('hidden');
+            const clienteRef =
+                doc(
+                    db,
+                    "clientes",
+                    user.uid
+                );
 
-    try {
-        const docRef = doc(db, "pedidos", idTicket);
-        const docSnap = await getDoc(docRef);
+            const clienteSnap =
+                await getDoc(
+                    clienteRef
+                );
 
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            
-            lblCliente.innerText = data.nombre;
-            lblTicket.innerText = idTicket;
-            
-            resetTracker();
+            if (!clienteSnap.exists()) {
 
-            const estado = data.estado;
-            if (estado === "recibido") {
-                stepRecibido.classList.add('active');
-            } else if (estado === "lavando") {
-                stepRecibido.classList.add('completed');
-                stepLavando.classList.add('active');
-            } else if (estado === "listo") {
-                stepRecibido.classList.add('completed');
-                stepLavando.classList.add('completed');
-                stepListo.classList.add('completed', 'active');
+                await setDoc(
+                    clienteRef,
+                    {
+                        uid:
+                            user.uid,
+
+                        nombre:
+                            user.displayName,
+
+                        correo:
+                            user.email,
+
+                        fechaRegistro:
+                            new Date().toISOString()
+                    }
+                );
+
             }
 
-            trackerContainer.classList.remove('hidden');
+            btnLogin.style.display = "none";
+
+            btnMiPedido.classList.remove("hidden");
+
+            btnModificarPedido.classList.add("hidden");
+
+            btnLogout.style.display = "inline-block";
+
+            userName.textContent =
+                `Hola, ${user.displayName}`;
+
         } else {
-            errorCliente.classList.remove('hidden');
+
+            btnLogin.style.display = "inline-block";
+
+            btnLogout.style.display = "none";
+
+            btnMiPedido.classList.add("hidden");
+
+            btnModificarPedido.classList.add("hidden");
+
+            userName.textContent = "";
+
         }
-    } catch (error) {
-        console.error("Error al buscar el ticket: ", error);
-        alert("Ocurrió un problema al conectar con el servidor.");
-    }
-});
 
-function resetTracker() {
-    const steps = [stepRecibido, stepLavando, stepListo];
-    steps.forEach(st => {
-        st.classList.remove('active', 'completed');
     });
-}
 
-// --- LÓGICA 2: GUARDAR / ACTUALIZAR PEDIDO (ADMIN) ---
-adminForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+    // ==========================
+    // HACER PEDIDO
+    // ==========================
 
-    const idTicket = adminTicket.value.trim().toUpperCase();
-    const nombreCliente = adminNombre.value.trim();
-    const estadoActual = adminEstado.value;
+    if (btnHacerPedido) {
 
-    try {
-        await setDoc(doc(db, "pedidos", idTicket), {
-            nombre: nombreCliente,
-            estado: estadoActual,
-            fechaActualizacion: new Date().toISOString()
+        btnHacerPedido.addEventListener('click', async () => {
+
+            if (!auth.currentUser) {
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Inicia sesión',
+                    text: 'Debes registrarte o iniciar sesión antes de realizar un pedido.',
+                    confirmButtonColor: '#0071e3'
+                });
+
+                try {
+
+                    await signInWithPopup(auth, provider);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Registro exitoso',
+                        text: 'Ahora puedes realizar tu pedido.',
+                        confirmButtonColor: '#0071e3'
+                    });
+
+                    window.location.href = "pedido.html";
+
+                } catch (e) {
+
+                    console.error(e);
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo iniciar sesión.',
+                        confirmButtonColor: '#0071e3'
+                    });
+
+                }
+
+            } else {
+
+                window.location.href = "pedido.html";
+
+            }
+
         });
 
-        successAdmin.classList.remove('hidden');
-        adminForm.reset();
+    }
 
-        setTimeout(() => {
-            successAdmin.classList.add('hidden');
-        }, 4000);
+    // ==========================
+    // LOGIN GOOGLE
+    // ==========================
 
-    } catch (error) {
-        console.error("Error al guardar en Firebase: ", error);
-        alert("No se pudo guardar la información. Revisa tus reglas de Firebase.");
+    if (btnLogin) {
+
+        btnLogin.addEventListener('click', async () => {
+
+            try {
+
+                await signInWithPopup(auth, provider);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sesión iniciada',
+                    text: '¡Bienvenido a LavaExpress!',
+                    confirmButtonColor: '#0071e3'
+                });
+
+            } catch (e) {
+
+                console.error(e);
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo iniciar sesión.',
+                    confirmButtonColor: '#0071e3'
+                });
+
+            }
+
+        });
+
+    }
+
+    // ==========================
+    // BUSCAR PEDIDO
+    // ==========================
+
+    if (btnBuscar) {
+
+        btnBuscar.addEventListener('click', async () => {
+
+            const idTicket =
+                document
+                    .getElementById('ticketInput')
+                    .value
+                    .trim()
+                    .toUpperCase();
+
+            btnDetallePedido.classList.remove("hidden");
+
+            if (!idTicket) {
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campo vacío',
+                    text: 'Ingresa un número de ticket.',
+                    confirmButtonColor: '#0071e3'
+                });
+
+                return;
+
+            }
+
+            try {
+
+                const docSnap =
+                    await getDoc(
+                        doc(db, "pedidos", idTicket)
+                    );
+
+                if (docSnap.exists()) {
+
+                    const datos =
+                        docSnap.data();
+
+                    btnDetallePedido.onclick = () => {
+
+                        const totalPrendas =
+                            (datos.polos || 0) +
+                            (datos.camisas || 0) +
+                            (datos.pantalones || 0) +
+                            (datos.casacas || 0) +
+                            (datos.chompas || 0);
+
+                        Swal.fire({
+
+                            title: "📦 Prendas enviadas",
+
+                            width: 650,
+
+                            html: `
+
+        <div style="text-align:left;line-height:1.8;">
+
+            <b>🎫 Ticket:</b> ${idTicket}<br><br>
+
+            <b>🧺 Servicios:</b><br>
+
+${(datos.servicios || []).length > 0
+                                    ? (datos.servicios || []).map(servicio =>
+                                        `✅ ${servicio}`
+                                    ).join("<br>")
+                                    : "No registrado"}
+
+<br><br>
+
+            <b>👕 Polos:</b> ${datos.polos || 0}<br>
+
+            <b>👔 Camisas:</b> ${datos.camisas || 0}<br>
+
+            <b>👖 Pantalones:</b> ${datos.pantalones || 0}<br>
+
+            <b>🧥 Casacas:</b> ${datos.casacas || 0}<br>
+
+            <b>🧶 Chompas:</b> ${datos.chompas || 0}<br><br>
+
+            <b>📦 Total de prendas:</b> ${totalPrendas}<br><br>
+
+            <b>📍 Dirección:</b><br>
+
+            ${datos.direccion || "No registrada"}<br><br>
+
+            <b>📝 Observaciones:</b><br>
+
+            ${datos.observaciones || "Ninguna"}
+
+        </div>
+
+        `,
+
+                            confirmButtonText: "Cerrar",
+
+                            confirmButtonColor: "#0071e3"
+
+                        });
+
+                    };
+
+                    document
+                        .getElementById('lblCliente')
+                        .innerText =
+                        datos.nombre || "Cliente";
+
+                    document
+                        .getElementById('lblTicket')
+                        .innerText =
+                        idTicket;
+
+                    document
+                        .getElementById('trackerContainer')
+                        .classList
+                        .remove('hidden');
+
+                    // ==========================
+                    // LIMPIAR PASOS
+                    // ==========================
+
+                    document
+                        .querySelectorAll('.step')
+                        .forEach(step => {
+
+                            step.classList.remove('active');
+                            step.classList.remove('current');
+
+                        });
+
+                    const estado =
+                        datos.estado
+                            ? datos.estado.toLowerCase()
+                            : "recibido";
+
+                    if (estado === "pendiente") {
+
+                        btnModificarPedido.classList.remove("hidden");
+
+                    } else {
+
+                        btnModificarPedido.classList.add("hidden");
+
+                    }
+
+                    // ==========================
+                    // PENDIENTE
+                    // ==========================
+
+                    if (estado === "pendiente") {
+
+                        document
+                            .getElementById('step-pendiente')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-pendiente')
+                            .classList
+                            .add('current');
+
+                    }
+
+                    // ==========================
+                    // RECIBIDO
+                    // ==========================
+
+                    if (estado === "recibido") {
+
+                        document
+                            .getElementById('step-pendiente')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-recibido')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-recibido')
+                            .classList
+                            .add('current');
+
+                    }
+
+                    // ==========================
+                    // LAVANDO
+                    // ==========================
+
+                    if (estado === "lavando") {
+
+                        document
+                            .getElementById('step-recibido')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-lavando')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-lavando')
+                            .classList
+                            .add('current');
+
+                    }
+
+                    // ==========================
+                    // SECANDO
+                    // ==========================
+
+                    if (estado === "secando") {
+
+                        document
+                            .getElementById('step-recibido')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-lavando')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-secando')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-secando')
+                            .classList
+                            .add('current');
+
+                    }
+
+                    // ==========================
+                    // PLANCHANDO
+                    // ==========================
+
+                    if (estado === "planchando") {
+
+                        document
+                            .getElementById('step-recibido')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-lavando')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-secando')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-planchando')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-planchando')
+                            .classList
+                            .add('current');
+
+                    }
+
+                    // ==========================
+                    // LISTO
+                    // ==========================
+
+                    if (estado === "listo") {
+
+                        document
+                            .getElementById('step-recibido')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-lavando')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-secando')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-planchando')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-listo')
+                            .classList
+                            .add('active');
+
+                        document
+                            .getElementById('step-listo')
+                            .classList
+                            .add('current');
+
+
+                        // ==========================================
+                        // ENTREGA PROGRAMADA
+                        // ==========================================
+
+
+
+                    }
+
+                } else {
+
+                    btnDetallePedido.classList.add("hidden");
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Ticket no encontrado',
+                        text: 'Verifica el número ingresado.',
+                        confirmButtonColor: '#0071e3'
+                    });
+
+                }
+
+            } catch (e) {
+
+                console.error(e);
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Ocurrió un error al buscar el pedido.',
+                    confirmButtonColor: '#0071e3'
+                });
+
+            }
+
+        });
+
+    }
+    // ==========================
+    // MI PEDIDO
+    // ==========================
+
+    if (btnMiPedido) {
+
+        btnMiPedido.addEventListener('click', async () => {
+
+            try {
+
+                const usuario =
+                    auth.currentUser;
+
+                if (!usuario) {
+                    return;
+                }
+
+                const pedidos =
+                    await getDocs(
+
+                        query(
+                            collection(db, "pedidos"),
+
+                            where(
+                                "correo",
+                                "==",
+                                usuario.email
+                            )
+
+                        )
+
+                    );
+
+                if (pedidos.empty) {
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Sin pedido',
+                        text: 'No se encontró un pedido registrado.'
+                    });
+
+                    return;
+
+                }
+
+                const pedidosOrdenados =
+                    pedidos.docs.sort((a, b) => {
+
+                        const fechaA =
+                            a.data().fechaCreacion || "";
+
+                        const fechaB =
+                            b.data().fechaCreacion || "";
+
+                        return fechaB.localeCompare(fechaA);
+
+                    });
+
+                const ultimoPedido =
+                    pedidosOrdenados[0];
+
+                if (ultimoPedido.data().estado.toLowerCase() === "pendiente") {
+
+                    btnModificarPedido.classList.remove("hidden");
+
+                } else {
+
+                    btnModificarPedido.classList.add("hidden");
+
+                }
+
+                document.getElementById(
+                    'ticketInput'
+                ).value =
+                    ultimoPedido.id;
+
+                btnBuscar.click();
+
+                const pedidosProceso =
+                    document.getElementById(
+                        "pedidosProceso"
+                    );
+
+                const historialPedidos =
+                    document.getElementById(
+                        "historialPedidos"
+                    );
+
+                const misPedidosContainer =
+                    document.getElementById(
+                        "misPedidosContainer"
+                    );
+
+                pedidosProceso.innerHTML = "";
+                historialPedidos.innerHTML = "";
+
+                misPedidosContainer.classList.remove(
+                    "hidden"
+                );
+
+                pedidosOrdenados.forEach((pedidoDoc) => {
+
+                    const pedido =
+                        pedidoDoc.data();
+
+                    const totalPrendas =
+                        (pedido.polos || 0) +
+                        (pedido.camisas || 0) +
+                        (pedido.pantalones || 0) +
+                        (pedido.casacas || 0) +
+                        (pedido.chompas || 0);
+
+                    const tarjeta = `
+
+        <div style="
+            background:#fff;
+            padding:15px;
+            margin-bottom:10px;
+            border-radius:10px;
+            box-shadow:0 2px 10px rgba(0,0,0,.08);
+        ">
+
+            <strong>
+                Ticket:
+            </strong>
+            ${pedido.ticket}
+
+            <br>
+
+            <strong>
+                Fecha:
+            </strong>
+            ${new Date(
+                        pedido.fechaCreacion
+                    ).toLocaleString('es-PE')}
+
+            <br>
+
+            <strong>
+                Estado:
+            </strong>
+            ${pedido.estado}
+
+            <br>
+
+            <strong>
+                Prendas:
+            </strong>
+            ${totalPrendas}
+
+        </div>
+
+    `;
+
+                    if (
+
+                        pedido.estado.toLowerCase() === "listo"
+
+                        &&
+
+                        pedido.entregado
+
+                    ) {
+
+                        const tarjetaHistorial = `
+
+    <div style="
+        background:#fff;
+        padding:15px;
+        margin-bottom:10px;
+        border-radius:10px;
+        box-shadow:0 2px 10px rgba(0,0,0,.08);
+    ">
+
+        <strong>🎫 Ticket:</strong>
+        ${pedido.ticket}
+
+        <br>
+
+        <strong>📅 Fecha de entrega:</strong>
+        ${pedido.fechaEntregado || "-"}
+
+        <br>
+
+        <strong>🕒 Hora de entrega:</strong>
+        ${pedido.horaEntregado || "-"}
+
+        <br>
+
+        <strong>✅ Estado:</strong>
+        Entregado
+
+        <br>
+
+        <strong>📦 Prendas:</strong>
+        ${totalPrendas}
+
+        <br><br>
+
+<button
+class="btnReclamo"
+data-ticket="${pedido.ticket}"
+style="
+background:#ef4444;
+color:white;
+border:none;
+padding:10px 18px;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+">
+
+📢 Presentar reclamo
+
+</button>
+
+${pedido.respuestaReclamo ? `
+
+<hr style="margin:20px 0;">
+
+<div style="
+background:#eef7ff;
+padding:15px;
+border-radius:10px;
+border-left:5px solid #0d6efd;
+">
+
+<h4 style="margin-top:0;">
+📢 Reclamo respondido
+</h4>
+
+<p>
+
+<b>Estado:</b>
+
+${pedido.estadoReclamo || "Respondido"}
+
+</p>
+
+<p>
+
+<b>Respuesta de LavaExpress:</b>
+
+</p>
+
+<div style="
+background:white;
+padding:12px;
+border-radius:8px;
+">
+
+${pedido.respuestaReclamo}
+
+</div>
+
+<p style="margin-top:15px;">
+
+<b>Fecha:</b>
+
+${pedido.fechaRespuestaReclamo || "-"}
+
+</p>
+
+</div>
+
+` : ""}
+
+    </div>
+
+    `;
+
+                        historialPedidos.innerHTML += tarjetaHistorial;
+
+                    }
+
+                    else {
+
+                        let tarjetaProceso = tarjeta;
+
+                        // ==========================================
+                        // REPARTIDOR EN CAMINO
+                        // ==========================================
+
+                        if (
+
+                            pedido.estado.toLowerCase() === "pendiente"
+
+                            &&
+
+                            pedido.avisoRecojo
+
+                        ) {
+
+                            tarjetaProceso = `
+
+<div style="
+background:#fff8e1;
+padding:18px;
+margin-bottom:12px;
+border-radius:12px;
+border-left:6px solid #f59e0b;
+">
+
+<strong>🎫 Ticket:</strong>
+
+${pedido.ticket}
+
+<br><br>
+
+<strong>🟡 Estado:</strong>
+
+Pendiente
+
+<br>
+
+<strong>🚚 Repartidor:</strong>
+
+${pedido.repartidorRecojo || "Por asignar"}
+
+<br>
+
+<strong>⏱ Llegará aproximadamente en:</strong>
+
+${pedido.tiempoLlegada}
+
+<br><br>
+
+<div style="
+background:#fff3cd;
+padding:10px;
+border-radius:8px;
+font-size:14px;
+">
+
+🚚 Nuestro repartidor ya salió hacia tu domicilio.
+Ten tus prendas listas para agilizar el servicio.
+
+</div>
+
+</div>
+
+`;
+
+                        }
+
+                        if (
+
+                            pedido.estado.toLowerCase() === "listo"
+
+                            &&
+
+                            !pedido.entregado
+
+                        ) {
+
+                            tarjetaProceso = `
+
+        <div style="
+            background:#e8f5e9;
+            padding:18px;
+            margin-bottom:12px;
+            border-radius:12px;
+            border-left:6px solid #22c55e;
+        ">
+
+            <strong>🎫 Ticket:</strong>
+            ${pedido.ticket}
+
+            <br><br>
+
+            <strong>🟢 Estado:</strong>
+            Listo
+
+            <br>
+
+            <strong>📅 Entrega programada:</strong>
+            ${pedido.fechaEntrega || "-"}
+
+            <br>
+
+            <strong>🕒 Hora estimada:</strong>
+            ${pedido.horaEntrega || "-"}
+
+            <br>
+
+<strong>🚚 Repartidor:</strong>
+
+${pedido.repartidorEntrega || "Por asignar"}
+
+<hr style="margin:18px 0;">
+
+<div style="
+background:#fff8e1;
+padding:14px;
+border-radius:10px;
+border-left:5px solid #f59e0b;
+font-size:14px;
+line-height:1.7;
+">
+
+<b>💡 Recomendación</b>
+
+<br><br>
+
+Cuando recibas tu pedido, revisa cuidadosamente que todas tus prendas hayan sido entregadas correctamente y que el servicio realizado sea el esperado.
+
+<br><br>
+
+📢 Si detectas algún inconveniente, podrás presentar un reclamo dentro de las <b>48 horas posteriores a la entrega</b> desde la sección <b>Historial de Pedidos</b>.
+
+</div>
+
+        </div>
+
+        `;
+
+                        }
+
+                        pedidosProceso.innerHTML += tarjetaProceso;
+
+                    }
+
+                });
+
+                // ==========================================
+                // BOTÓN PRESENTAR RECLAMO
+                // ==========================================
+
+                document.querySelectorAll(".btnReclamo").forEach(boton => {
+
+                    boton.addEventListener("click", () => {
+
+                        const ticket = boton.dataset.ticket;
+
+                        Swal.fire({
+
+                            title: "📢 Presentar reclamo",
+
+                            width: 650,
+
+                            html: `
+
+<div style="text-align:left;">
+
+<b>🎫 Ticket:</b>
+
+${ticket}
+
+<br><br>
+
+<label><b>Motivo del reclamo</b></label>
+
+<select
+id="tipoReclamo"
+style="
+width:100%;
+padding:10px;
+margin-top:8px;
+margin-bottom:20px;
+">
+
+<option>Falta una prenda</option>
+
+<option>Prenda dañada</option>
+
+<option>Prenda manchada</option>
+
+<option>Mal lavado</option>
+
+<option>Demora en la entrega</option>
+
+<option>Otro</option>
+
+</select>
+
+<label><b>Describe lo ocurrido</b></label>
+
+<textarea
+
+id="descripcionReclamo"
+
+rows="6"
+
+style="
+width:100%;
+margin-top:8px;
+padding:10px;
+resize:none;
+"
+
+placeholder="Describe detalladamente lo sucedido...">
+
+</textarea>
+
+</div>
+
+`,
+
+                            showCancelButton: true,
+
+                            confirmButtonText: "📨 Enviar reclamo",
+
+                            cancelButtonText: "Cancelar",
+
+                            confirmButtonColor: "#ef4444",
+
+                            preConfirm: () => {
+
+                                const tipo =
+
+                                    document.getElementById(
+                                        "tipoReclamo"
+                                    ).value;
+
+                                const descripcion =
+
+                                    document.getElementById(
+                                        "descripcionReclamo"
+                                    ).value.trim();
+
+                                if (!descripcion) {
+
+                                    Swal.showValidationMessage(
+
+                                        "Debes escribir una descripción."
+
+                                    );
+
+                                    return false;
+
+                                }
+
+                                return {
+
+                                    tipo,
+
+                                    descripcion
+
+                                };
+
+                            }
+
+                        }).then(async (result) => {
+
+                            if (!result.isConfirmed) return;
+
+                            try {
+
+                                await addDoc(
+
+                                    collection(db, "reclamos"),
+
+                                    {
+
+                                        ticket: ticket,
+
+                                        cliente: auth.currentUser.displayName,
+
+                                        correo: auth.currentUser.email,
+
+                                        tipo: result.value.tipo,
+
+                                        descripcion: result.value.descripcion,
+
+                                        fecha: new Date().toISOString(),
+
+                                        estado: "Pendiente"
+
+                                    }
+
+                                );
+
+                                Swal.fire({
+
+                                    icon: "success",
+
+                                    title: "Reclamo enviado",
+
+                                    text: "Tu reclamo fue registrado correctamente. Nos pondremos en contacto contigo.",
+
+                                    confirmButtonColor: "#0071e3"
+
+                                });
+
+                            } catch (error) {
+
+                                console.error(error);
+
+                                Swal.fire({
+
+                                    icon: "error",
+
+                                    title: "Error",
+
+                                    text: "No se pudo registrar el reclamo.",
+
+                                    confirmButtonColor: "#0071e3"
+
+                                });
+
+                            }
+
+                        });
+
+                    });
+
+                });
+
+            } catch (error) {
+
+                console.error(error);
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudieron obtener los pedidos.'
+                });
+
+            }
+
+        });
+
+    }
+
+    // ==========================
+    // MODIFICAR PEDIDO
+    // ==========================
+
+    if (btnModificarPedido) {
+
+        btnModificarPedido.addEventListener('click', () => {
+
+            window.location.href =
+                "pedido.html?editar=true";
+
+        });
+
+    }
+
+    // ==========================
+    // CERRAR SESIÓN
+    // ==========================
+
+    if (btnLogout) {
+
+        btnLogout.addEventListener('click', async () => {
+
+            try {
+
+                await signOut(auth);
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Sesión cerrada',
+                    text: 'Has cerrado sesión correctamente.',
+                    confirmButtonColor: '#0071e3'
+                });
+
+                location.reload();
+
+            } catch (e) {
+
+                console.error(e);
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo cerrar sesión.',
+                    confirmButtonColor: '#0071e3'
+                });
+
+
+
+            }
+
+        });
+
     }
 });
 
-// --- LÓGICA 3: MOSTRAR / OCULTAR EL PANEL ADMIN ---
-const toggleAdminBtn = document.getElementById('toggleAdminBtn');
-const adminPanelSection = document.getElementById('adminPanelSection');
-
-toggleAdminBtn.addEventListener('click', () => {
-    adminPanelSection.classList.toggle('hidden');
-    if(!adminPanelSection.classList.contains('hidden')){
-        adminPanelSection.scrollIntoView({ behavior: 'smooth' });
-    }
-});
-
-// --- LÓGICA 4: CONTROLLER DE LA VENTANA EMERGENTE (NOSOTROS) ---
-const openNosotrosBtn = document.getElementById('openNosotrosBtn');
-const nosotrosModal = document.getElementById('nosotrosModal');
-const closeNosotrosBtn = document.getElementById('closeNosotrosBtn');
-const modalActionBtn = document.getElementById('modalActionBtn');
-
-// Abrir modal al hacer clic en "Nosotros"
-openNosotrosBtn.addEventListener('click', (e) => {
-    e.preventDefault(); // Evita que la página salte
-    nosotrosModal.classList.remove('hidden');
-});
-
-// Cerrar modal con la "X"
-closeNosotrosBtn.addEventListener('click', () => {
-    nosotrosModal.classList.add('hidden');
-});
-
-// Cerrar modal con el botón "¡Excelente!"
-modalActionBtn.addEventListener('click', () => {
-    nosotrosModal.classList.add('hidden');
-});
-
-// Cerrar modal si el usuario hace clic afuera de la tarjeta blanca
-window.addEventListener('click', (e) => {
-    if (e.target === nosotrosModal) {
-        nosotrosModal.classList.add('hidden');
-    }
-});

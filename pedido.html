@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitar Recojo | LavaExpress Lima</title>
+
+    <link rel="stylesheet" href="pedido.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="card">
+
+            <div class="top">
+
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+
+                <h1>Solicitar Recojo</h1>
+
+                <p>
+                    Completa los datos para programar
+                    el recojo de tus prendas a domicilio.
+                </p>
+
+            </div>
+
+            <form id="pedidoForm">
+
+                <!-- =====================================================
+     DATOS DEL CLIENTE
+     El usuario ingresa su nombre y teléfono.
+====================================================== -->
+
+                <div class="field">
+
+                    <label>
+                        <i class="fas fa-user"></i>
+                        Nombre completo
+                    </label>
+
+                    <input type="text" id="nombreCliente" placeholder="Ej. Roberto Diestra">
+
+                </div>
+
+                <div class="field">
+
+                    <label>
+                        <i class="fas fa-phone"></i>
+                        Teléfono
+                    </label>
+
+                    <input type="tel" id="telefonoCliente" placeholder="Ej. 987654321">
+
+                </div>
+
+                <div class="field">
+
+                    <label>
+                        <i class="fas fa-location-dot"></i>
+                        Dirección de recojo
+                    </label>
+
+                    <input type="text" id="direccion" placeholder="Ej. Av. Javier Prado 1234, San Isidro">
+
+                </div>
+
+                <div class="field">
+
+                    <label>
+                        <i class="fas fa-calendar"></i>
+                        Fecha y Hora
+                    </label>
+
+                    <input type="datetime-local" id="fechaRecojo">
+
+                </div>
+
+                <div class="field">
+
+                    <label>
+                        <i class="fas fa-shirt"></i>
+                        Servicios
+                    </label>
+
+                    <div class="services">
+
+                        <div class="service-card" data-service="Lavado">
+                            <i class="fas fa-soap"></i>
+                            <span>Lavado</span>
+                        </div>
+
+                        <div class="service-card" data-service="Secado">
+                            <i class="fas fa-wind"></i>
+                            <span>Secado</span>
+                        </div>
+
+                        <div class="service-card" data-service="Planchado">
+                            <i class="fas fa-shirt"></i>
+                            <span>Planchado</span>
+                        </div>
+
+                    </div>
+
+
+                </div>
+                <div class="field">
+
+                    <label>
+                        <i class="fas fa-box"></i>
+                        Prendas a enviar
+                    </label>
+
+                    <div class="prendas-grid">
+
+                        <div>
+                            <label>👕 Polos</label>
+                            <input type="number" id="polos" min="0" value="0">
+                        </div>
+
+                        <div>
+                            <label>👔 Camisas</label>
+                            <input type="number" id="camisas" min="0" value="0">
+                        </div>
+
+                        <div>
+                            <label>👖 Pantalones</label>
+                            <input type="number" id="pantalones" min="0" value="0">
+                        </div>
+
+                        <div>
+                            <label>🧥 Casacas</label>
+                            <input type="number" id="casacas" min="0" value="0">
+                        </div>
+
+                        <div>
+                            <label>🧶 Chompas</label>
+                            <input type="number" id="chompas" min="0" value="0">
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="field">
+
+                    <label>
+                        <i class="fas fa-note-sticky"></i>
+                        Observaciones (opcional)
+                    </label>
+
+                    <textarea id="observaciones" rows="4"
+                        placeholder="Ropa delicada, prendas especiales, instrucciones de entrega, etc."></textarea>
+
+                </div>
+
+
+
+                <button type="submit" class="submit-btn">
+
+                    Confirmar Solicitud
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="pedido.js"></script>
+
+
+</body>
+
+</html>

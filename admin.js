@@ -8,7 +8,7 @@ import {
     doc,
     updateDoc,
     deleteDoc,
-    addDoc
+    addDoc,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 import {
@@ -263,6 +263,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             let listos = 0;
 
+                            let entregados = 0;
+
                             let historialHTML = "";
 
                             let telefonoCliente = "No registrado";
@@ -506,6 +508,8 @@ ${(pedido.polos || 0)
 
 
 
+
+
             const querySnapshot =
                 await getDocs(
                     collection(db, "pedidos")
@@ -532,6 +536,7 @@ ${(pedido.polos || 0)
             let secando = 0;
             let planchando = 0;
             let listos = 0;
+            let entregados = 0;
 
 
             pedidosOrdenados.forEach((documento) => {
@@ -562,7 +567,17 @@ ${(pedido.polos || 0)
                 }
 
                 if (pedido.estado === "listo") {
-                    listos++;
+
+                    if (pedido.entregado) {
+
+                        entregados++;
+
+                    } else {
+
+                        listos++;
+
+                    }
+
                 }
 
                 const totalPrendas =
@@ -577,6 +592,9 @@ ${(pedido.polos || 0)
 
                 card.dataset.estado =
                     pedido.estado;
+
+                card.dataset.entregado =
+                    pedido.entregado;
 
                 card.dataset.fecha = pedido.fechaCreacion;
 
@@ -642,6 +660,28 @@ ${(pedido.polos || 0)
                            ${pedido.estado}
                         </span>
                     </p>
+
+                    ${pedido.entregado ? `
+
+<p>
+
+<span style="
+display:inline-block;
+background:#16a34a;
+color:white;
+padding:6px 12px;
+border-radius:20px;
+font-weight:bold;
+font-size:13px;
+">
+
+✅ ENTREGADO
+
+</span>
+
+</p>
+
+` : ""}
 
                     <select class="estado-select">
                         <option value="pendiente">
@@ -1364,12 +1404,33 @@ ${(
                         return;
                     }
 
-                    if (
-                        estado === "todos"
-                    ) {
+                    if (estado === "todos") {
+
+                        tarjeta.style.display = "block";
+
+                        return;
+
+                    }
+
+                    if (estado === "listo") {
 
                         tarjeta.style.display =
-                            "block";
+                            tarjeta.dataset.estado === "listo" &&
+                                tarjeta.dataset.entregado !== "true"
+                                ? "block"
+                                : "none";
+
+                        return;
+
+                    }
+
+                    if (estado === "entregados") {
+
+                        tarjeta.style.display =
+                            tarjeta.dataset.estado === "listo" &&
+                                tarjeta.dataset.entregado === "true"
+                                ? "block"
+                                : "none";
 
                         return;
 
@@ -1512,6 +1573,14 @@ ${(
 
                 });
 
+            document
+                .getElementById("btnEntregados")
+                .addEventListener("click", () => {
+
+                    filtrarPedidos("entregados");
+
+                });
+
             // ======================================
             // BOTONES DE FILTRO POR FECHA
             // ======================================
@@ -1593,6 +1662,9 @@ ${(
             document.getElementById("btnListos").innerHTML =
                 `🟢 Listos (${listos})`;
 
+            document.getElementById("btnEntregados").innerHTML =
+                `✅ Entregados (${entregados})`;
+
             //==============================
             // MENÚ LATERAL
             //==============================
@@ -1618,6 +1690,12 @@ ${(
             const seccionReclamos =
                 document.getElementById("seccionReclamos");
 
+            const seccionReportes =
+                document.getElementById("seccionReportes");
+
+            const reporteResumen =
+                document.getElementById("reporteResumen");
+
             const seccionTickets =
                 document.querySelector(".seccionTickets");
 
@@ -1640,6 +1718,10 @@ ${(
                 seccionPagos.style.display = "none";
 
                 seccionReclamos.style.display = "none";
+
+                seccionReportes.style.display = "none";
+
+
 
 
 
@@ -1744,6 +1826,21 @@ ${(
 
                                 ].filter(Boolean).join(" • ")}
 
+    <br>
+
+    🕒 ${pedido.repartidorRecojo === "lavaexpressrepartidor1@gmail.com"
+                                    ? (
+                                        pedido.fechaPago
+                                            ? new Date(pedido.fechaPago).toLocaleString("es-PE")
+                                            : "Pendiente"
+                                    )
+                                    : (
+                                        pedido.fechaEntregado
+                                            ? new Date(pedido.fechaEntregado).toLocaleString("es-PE")
+                                            : "Pendiente"
+                                    )
+                                }
+
 </div>
 
 `;
@@ -1829,6 +1926,21 @@ ${(
 
                                 ].filter(Boolean).join(" • ")}
 
+<br>
+
+🕒 ${pedido.repartidorRecojo === "lavaexpressrepartidor2@gmail.com"
+                                    ? (
+                                        pedido.fechaPago
+                                            ? new Date(pedido.fechaPago).toLocaleString("es-PE")
+                                            : "Pendiente"
+                                    )
+                                    : (
+                                        pedido.fechaEntregado
+                                            ? new Date(pedido.fechaEntregado).toLocaleString("es-PE")
+                                            : "Pendiente"
+                                    )
+                                }
+
 </div>
 
 `;
@@ -1877,19 +1989,21 @@ ${(
 
             document
                 .getElementById("menuPagos")
-                .addEventListener("click", async () => {
+                .addEventListener("click", () => {
 
                     ocultarTodo();
 
                     seccionPagos.style.display = "block";
 
-                    await cargarPagos();
+                    document.getElementById("listaPagos").innerHTML = "";
 
                 });
 
 
             document
                 .getElementById("menuReclamos")
+
+
                 .addEventListener("click", async () => {
 
                     ocultarTodo();
@@ -2085,6 +2199,8 @@ ${new Date(reclamo.fechaRespuesta).toLocaleString("es-PE")}
 
                     });
 
+
+
                     document.getElementById("contadorPendientes").textContent =
                         pendientes;
 
@@ -2255,6 +2371,193 @@ style="width:95%;height:140px;"
 
                 });
 
+            document
+    .getElementById("menuReportes")
+    .addEventListener("click", async () => {
+
+        ocultarTodo();
+
+        seccionReportes.style.display = "block";
+
+        const pedidos =
+            await getDocs(collection(db, "pedidos"));
+
+        const clientes =
+            await getDocs(collection(db, "clientes"));
+
+        const reclamos =
+            await getDocs(collection(db, "reclamos"));
+
+        let ingresos = 0;
+        let entregados = 0;
+        let pendientesReclamo = 0;
+
+        pedidos.forEach((docu) => {
+
+            const pedido = docu.data();
+
+            if (pedido.pago === "pagado") {
+
+                ingresos += Number(pedido.total || 0);
+
+            }
+
+            if (pedido.entregado === true) {
+
+                entregados++;
+
+            }
+
+        });
+
+        document
+    .getElementById("btnGenerarReporte")
+    .addEventListener("click", async () => {
+
+        const { jsPDF } = window.jspdf;
+
+        const pdf = new jsPDF();
+
+        const pedidos =
+            await getDocs(collection(db, "pedidos"));
+
+        const clientes =
+            await getDocs(collection(db, "clientes"));
+
+        const reclamos =
+            await getDocs(collection(db, "reclamos"));
+
+        let ingresos = 0;
+        let entregados = 0;
+        let pendientesReclamo = 0;
+
+        pedidos.forEach((docu) => {
+
+            const pedido = docu.data();
+
+            if (pedido.pago === "pagado") {
+
+                ingresos += Number(pedido.total || 0);
+
+            }
+
+            if (pedido.entregado === true) {
+
+                entregados++;
+
+            }
+
+        });
+
+        reclamos.forEach((docu) => {
+
+            if (docu.data().estado === "Pendiente") {
+
+                pendientesReclamo++;
+
+            }
+
+        });
+
+        pdf.setFontSize(20);
+        pdf.text("LAVAEXPRESS LIMA", 20, 20);
+
+        pdf.setFontSize(14);
+        pdf.text("REPORTE DEL DIA", 20, 35);
+
+        pdf.setFontSize(11);
+
+        pdf.text(
+            "Fecha: " +
+            new Date().toLocaleDateString("es-PE"),
+            20,
+            50
+        );
+
+        pdf.autoTable({
+
+            startY: 60,
+
+            head: [["Concepto", "Valor"]],
+
+            body: [
+
+                ["Pedidos Totales", pedidos.size],
+
+                ["Clientes Registrados", clientes.size],
+
+                ["Ingresos", "S/ " + ingresos.toFixed(2)],
+
+                ["Pedidos Entregados", entregados],
+
+                ["Reclamos Pendientes", pendientesReclamo]
+
+            ]
+
+        });
+
+        pdf.save(
+            "Reporte_LavaExpress.pdf"
+        );
+
+    });
+
+        reclamos.forEach((docu) => {
+
+            if (docu.data().estado === "Pendiente") {
+
+                pendientesReclamo++;
+
+            }
+
+        });
+
+       reporteResumen.innerHTML = `
+
+<div class="reporte-item">
+
+    <h3>📦 Pedidos Totales</h3>
+
+    <span>${pedidos.size}</span>
+
+</div>
+
+<div class="reporte-item">
+
+    <h3>👥 Clientes Registrados</h3>
+
+    <span>${clientes.size}</span>
+
+</div>
+
+<div class="reporte-item">
+
+    <h3>💰 Ingresos</h3>
+
+    <span>S/ ${ingresos.toFixed(2)}</span>
+
+</div>
+
+<div class="reporte-item">
+
+    <h3>🚚 Entregados</h3>
+
+    <span>${entregados}</span>
+
+</div>
+
+<div class="reporte-item">
+
+    <h3>📢 Reclamos Pendientes</h3>
+
+    <span>${pendientesReclamo}</span>
+
+</div>
+
+`;
+
+    });
+
             // ======================================
             // GRÁFICA DE PEDIDOS POR ESTADO
             // ======================================
@@ -2358,7 +2661,30 @@ style="width:95%;height:140px;"
 
                 const listaPagos = document.getElementById("listaPagos");
 
-                listaPagos.innerHTML = "";
+                listaPagos.innerHTML = `
+
+<div style="margin-bottom:20px;">
+
+<input
+    type="text"
+    id="buscarTicketPago"
+    placeholder="🔍 Buscar por Ticket"
+    style="
+        width:100%;
+        padding:12px;
+        border-radius:10px;
+        border:1px solid #ccc;
+        font-size:15px;
+    "
+>
+
+</div>
+
+`;
+
+                const contenedorPagos = document.createElement("div");
+
+                listaPagos.appendChild(contenedorPagos);
 
                 let ingresos = 0;
                 let realizados = 0;
@@ -2389,7 +2715,7 @@ style="width:95%;height:140px;"
 
                         }
 
-                        listaPagos.innerHTML += `
+                        contenedorPagos.innerHTML += `
 
 <div class="pedido-card">
 
@@ -2434,6 +2760,31 @@ style="width:95%;height:140px;"
 
                 document.getElementById("ingresosHoy").textContent =
                     "S/ " + hoy.toFixed(2);
+
+                const buscarTicketPago =
+                    document.getElementById("buscarTicketPago");
+
+                buscarTicketPago.addEventListener("input", () => {
+
+                    const texto =
+                        buscarTicketPago.value.toLowerCase().trim();
+
+                    const tarjetas =
+                        contenedorPagos.querySelectorAll(".pedido-card");
+
+                    tarjetas.forEach((tarjeta) => {
+
+                        const ticket =
+                            tarjeta.querySelector("h3").textContent.toLowerCase();
+
+                        tarjeta.style.display =
+                            ticket.includes(texto)
+                                ? "block"
+                                : "none";
+
+                    });
+
+                });
 
             }
 
@@ -2481,7 +2832,7 @@ style="width:95%;height:140px;"
 
                     });
 
-                    
+
 
                 });
 

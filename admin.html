@@ -92,7 +92,7 @@
                 <!-- Aquí comienzan las tarjetas -->
                 <div class="dashboard-grid">
 
-                    <!-- ==========================
+<!-- ==========================
      TARJETA: PEDIDOS TOTALES
 ========================== -->
 
@@ -108,7 +108,7 @@
 
                     </div>
 
-                    <!-- ==========================
+<!-- ==========================
      TARJETA: CLIENTES
 ========================== -->
 
@@ -126,7 +126,7 @@
 
                 </div>
             </div>
-            <!-- ==========================
+<!-- ==========================
      GRÁFICA DEL DASHBOARD
 ========================== -->
 
@@ -140,7 +140,7 @@
 
 
 
-            <!-- =====================================================
+<!-- =====================================================
      SECCIÓN DE CLIENTES
      Aquí se muestran todos los clientes registrados.
 ====================================================== -->
@@ -223,6 +223,10 @@
 
                         <button id="btnListos">
                             🟢 Listos
+                        </button>
+
+                        <button id="btnEntregados">
+                            ✅ Entregados
                         </button>
 
                     </div>
@@ -319,47 +323,79 @@
 
                 <div class="dashboard-grid">
 
-<div class="dashboard-card card-reclamos">
+                    <div class="dashboard-card card-reclamos">
 
-<h3>
+                        <h3>
 
-🟡 Reclamos Pendientes
+                            🟡 Reclamos Pendientes
 
-</h3>
+                        </h3>
 
-<span id="contadorPendientes">
+                        <span id="contadorPendientes">
 
-0
+                            0
 
-</span>
+                        </span>
 
-</div>
+                    </div>
 
-<div class="dashboard-card card-reclamos2">
+                    <div class="dashboard-card card-reclamos2">
 
-<h3>
+                        <h3>
 
-✅ Historial de Reclamos
+                            ✅ Historial de Reclamos
 
-</h3>
+                        </h3>
 
-<span id="contadorHistorial">
+                        <span id="contadorHistorial">
 
-0
+                            0
 
-</span>
+                        </span>
 
-</div>
+                    </div>
 
-</div>
+                </div>
 
-<div id="listaReclamosPendientes"></div>
+                <div id="listaReclamosPendientes"></div>
 
-<div id="listaReclamosHistorial" style="display:none;"></div>
+                <div id="listaReclamosHistorial" style="display:none;"></div>
+
+                
 
             </section>
 
-        </section>
+            <section id="seccionReportes" class="reportes-section" style="display:none;">
+
+    <div class="reportes-header">
+
+        <div>
+
+            <h2>📊 Reportes</h2>
+
+            <p>Resumen general del sistema LavaExpress.</p>
+
+        </div>
+
+        <button id="btnGenerarReporte" class="btn-pdf">
+
+            <i class="fas fa-file-pdf"></i>
+
+            Generar Reporte PDF
+
+        </button>
+
+    </div>
+
+    <div class="reporte-card">
+
+        <div id="reporteResumen">
+
+        </div>
+
+    </div>
+
+</section>
 
     </main>
 
@@ -367,6 +403,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script type="module" src="admin.js"></script>
     <script type="module" src="pagos.js"></script>
 

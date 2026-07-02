@@ -539,38 +539,38 @@ async function cargarDashboard() {
         const correoRepartidor = auth.currentUser.email;
 
         // ======================================
-// PEDIDOS ASIGNADOS
-// ======================================
+        // PEDIDOS ASIGNADOS
+        // ======================================
 
-// Recojos pendientes de cobrar
-if (
+        // Recojos pendientes de cobrar
+        if (
 
-    pedido.estado?.toLowerCase() === "pendiente" &&
+            pedido.estado?.toLowerCase() === "pendiente" &&
 
-    pedido.repartidorRecojo === correoRepartidor &&
+            pedido.repartidorRecojo === correoRepartidor &&
 
-    pedido.pago !== "pagado"
+            pedido.pago !== "pagado"
 
-) {
+        ) {
 
-    asignados++;
+            asignados++;
 
-}
+        }
 
-// Entregas pendientes de entregar
-if (
+        // Entregas pendientes de entregar
+        if (
 
-    pedido.estado?.toLowerCase() === "listo" &&
+            pedido.estado?.toLowerCase() === "listo" &&
 
-    pedido.repartidorEntrega === correoRepartidor &&
+            pedido.repartidorEntrega === correoRepartidor &&
 
-    !pedido.entregado
+            !pedido.entregado
 
-) {
+        ) {
 
-    asignados++;
+            asignados++;
 
-}
+        }
 
         // Contar solo los pagos de los pedidos asignados a este repartidor
         const perteneceAlRepartidor =
@@ -591,7 +591,15 @@ if (
 
             }
 
-            if (pedido.pago === "pagado") {
+            if (
+
+                pedido.pago === "pagado"
+
+                &&
+
+                pedido.repartidorPago === correoRepartidor
+
+            ) {
 
                 pagados++;
 

@@ -28,6 +28,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
+
+const serviciosNuevoPedido = [];
 const auth = getAuth(app);
 
 //==================================
@@ -1212,63 +1214,119 @@ ${(
 
                             if (select.value === "listo") {
 
-                                const { value: datosEntrega } = await Swal.fire({
+                                // ======================================
+                                // PEDIDO PRESENCIAL
+                                // ======================================
 
-                                    title: "🚚 Programar entrega",
+                                if (pedido.tipoPedido === "presencial") {
 
-                                    html: `
-            <input id="swalFecha" type="date" class="swal2-input">
+                                    await updateDoc(
 
-            <input id="swalHora" type="time" class="swal2-input">
-        `,
+                                        doc(db, "pedidos", documento.id),
 
-                                    focusConfirm: false,
+                                        {
 
-                                    showCancelButton: true,
+                                            estado: "listo",
 
-                                    confirmButtonText: "Guardar",
+                                            entregado: false,
 
-                                    cancelButtonText: "Cancelar",
+                                            fechaListo: new Date().toISOString()
 
-                                    preConfirm: () => {
+                                        }
 
-                                        return {
+                                    );
 
-                                            fecha: document.getElementById("swalFecha").value,
+                                    Swal.fire({
 
-                                            hora: document.getElementById("swalHora").value
+                                        icon: "success",
 
-                                        };
+                                        title: "Pedido listo",
 
-                                    }
+                                        html: `
 
-                                });
+<b>El cliente ya puede acercarse al local a recoger sus prendas.</b>
 
-                                if (!datosEntrega) {
+<br><br>
 
-                                    select.value = pedido.estado;
+🎫 Ticket: <b>${pedido.ticket}</b>
 
-                                    return;
+            `,
+
+                                        confirmButtonColor: "#0071e3"
+
+                                    });
 
                                 }
 
-                                await updateDoc(
+                                // ======================================
+                                // PEDIDO A DOMICILIO
+                                // ======================================
 
-                                    doc(db, "pedidos", documento.id),
+                                else {
 
-                                    {
+                                    const { value: datosEntrega } = await Swal.fire({
 
-                                        estado: select.value,
+                                        title: "🚚 Programar entrega",
 
-                                        fechaEntrega: datosEntrega.fecha,
+                                        html: `
 
-                                        horaEntrega: datosEntrega.hora,
+<input id="swalFecha" type="date" class="swal2-input">
 
-                                        entregado: false
+<input id="swalHora" type="time" class="swal2-input">
+
+            `,
+
+                                        focusConfirm: false,
+
+                                        showCancelButton: true,
+
+                                        confirmButtonText: "Guardar",
+
+                                        cancelButtonText: "Cancelar",
+
+                                        preConfirm: () => {
+
+                                            return {
+
+                                                fecha: document.getElementById("swalFecha").value,
+
+                                                hora: document.getElementById("swalHora").value
+
+                                            };
+
+                                        }
+
+                                    });
+
+                                    if (!datosEntrega) {
+
+                                        select.value = pedido.estado;
+
+                                        return;
 
                                     }
 
-                                );
+                                    await updateDoc(
+
+                                        doc(db, "pedidos", documento.id),
+
+                                        {
+
+                                            estado: "listo",
+
+                                            fechaEntrega: datosEntrega.fecha,
+
+                                            horaEntrega: datosEntrega.hora,
+
+                                            entregado: false,
+
+                                            fechaListo: new Date().toISOString()
+
+                                        }
+
+                                    );
+
+                                }
 
                             } else {
 
@@ -1299,18 +1357,33 @@ ${(
                             estadoTexto.className =
                                 `estado-text estado-${select.value}`;
 
-                            Swal.fire({
+                            if (
 
-                                icon: "success",
+                                !(
 
-                                title: "Estado actualizado",
+                                    select.value === "listo"
 
-                                text: `Nuevo estado: ${nombresEstados[select.value]}`,
+                                    &&
 
-                                confirmButtonColor: "#0071e3"
+                                    pedido.tipoPedido === "presencial"
 
-                            });
+                                )
 
+                            ) {
+
+                                Swal.fire({
+
+                                    icon: "success",
+
+                                    title: "Estado actualizado",
+
+                                    text: `Nuevo estado: ${nombresEstados[select.value]}`,
+
+                                    confirmButtonColor: "#0071e3"
+
+                                });
+
+                            }
                         } catch (error) {
 
                             console.error(error);
@@ -1684,6 +1757,9 @@ ${(
             const seccionRepartidores =
                 document.getElementById("seccionRepartidores");
 
+            const seccionNuevoPedido =
+                document.getElementById("seccionNuevoPedido");
+
             const seccionPagos =
                 document.getElementById("seccionPagos");
 
@@ -1713,6 +1789,8 @@ ${(
 
                 seccionTickets.style.display = "none";
 
+                seccionNuevoPedido.style.display = "none";
+
                 seccionRepartidores.style.display = "none";
 
                 seccionPagos.style.display = "none";
@@ -1724,6 +1802,34 @@ ${(
 
 
 
+
+            }
+
+            //==================================
+            // MENÚ RESPONSIVE
+            //==================================
+
+            const sidebar = document.querySelector(".sidebar");
+
+            const btnMenuMovil = document.getElementById("btnMenuMovil");
+
+            if (btnMenuMovil) {
+
+                btnMenuMovil.addEventListener("click", () => {
+
+                    sidebar.classList.toggle("activo");
+
+                });
+
+            }
+
+            function cerrarMenuMovil() {
+
+                if (window.innerWidth <= 768) {
+
+                    sidebar.classList.remove("activo");
+
+                }
 
             }
 
@@ -1743,6 +1849,8 @@ ${(
 
                     ocultarTodo();
 
+                    cerrarMenuMovil();
+
                     seccionPedidosTotales.style.display = "block";
 
                     graficaDashboard.style.display = "block";
@@ -1757,6 +1865,8 @@ ${(
 
                     ocultarTodo();
 
+                    cerrarMenuMovil();
+
                     seccionClientes.style.display = "block";
 
                 });
@@ -1767,16 +1877,124 @@ ${(
 
                     ocultarTodo();
 
+                    cerrarMenuMovil();
+
                     seccionGestionPedidos.style.display = "block";
 
                     seccionTickets.style.display = "none";
 
                 });
+
+            document
+                .getElementById("menuNuevoPedido")
+                .addEventListener("click", () => {
+
+                    ocultarTodo();
+
+                    cerrarMenuMovil();
+
+                    seccionNuevoPedido.style.display = "block";
+
+                });
+
+            document
+                .getElementById("btnContinuarPedido")
+                .addEventListener("click", () => {
+
+                    const nombre =
+                        document.getElementById("nuevoNombre").value.trim();
+
+                    const telefono =
+                        document.getElementById("nuevoTelefono").value.trim();
+
+                    const correo =
+                        document.getElementById("nuevoCorreo").value.trim();
+
+                    const direccion =
+                        document.getElementById("nuevoDireccion").value.trim();
+
+                    if (
+                        nombre === "" ||
+                        telefono === "" ||
+                        direccion === ""
+                    ) {
+
+                        Swal.fire({
+
+                            icon: "warning",
+
+                            title: "Faltan datos",
+
+                            text: "Complete todos los datos del cliente."
+
+                        });
+
+                        return;
+
+                    }
+
+                    document
+                        .getElementById("segundaPartePedido")
+                        .style.display = "block";
+
+                    document
+                        .getElementById("btnContinuarPedido")
+                        .style.display = "none";
+
+                });
+
+            [
+                {
+                    id: "servicioLavado",
+                    nombre: "Lavado"
+                },
+                {
+                    id: "servicioSecado",
+                    nombre: "Secado"
+                },
+                {
+                    id: "servicioPlanchado",
+                    nombre: "Planchado"
+                }
+
+            ].forEach(servicio => {
+
+                document
+                    .getElementById(servicio.id)
+                    .addEventListener("change", (e) => {
+
+                        if (e.target.checked) {
+
+                            if (!serviciosNuevoPedido.includes(servicio.nombre)) {
+
+                                serviciosNuevoPedido.push(servicio.nombre);
+
+                            }
+
+                        } else {
+
+                            const indice =
+                                serviciosNuevoPedido.indexOf(servicio.nombre);
+
+                            if (indice !== -1) {
+
+                                serviciosNuevoPedido.splice(indice, 1);
+
+                            }
+
+                        }
+
+                    });
+
+            });
+
             document
                 .getElementById("menuRepartidores")
                 .addEventListener("click", async () => {
 
                     ocultarTodo();
+
+                    cerrarMenuMovil();
 
                     seccionRepartidores.style.display = "block";
 
@@ -1985,17 +2203,497 @@ ${(
 
                 });
 
+            document
+                .getElementById("btnCalcularTotal")
+                .addEventListener("click", () => {
+
+                    const peso = Number(
+                        document.getElementById("pesoRopa").value
+                    );
+
+                    const precio = Number(
+                        document.getElementById("precioKilo").value
+                    );
+
+                    if (peso <= 0 || precio <= 0) {
+
+                        Swal.fire({
+
+                            icon: "warning",
+
+                            title: "Datos incompletos",
+
+                            text: "Ingrese el peso y el precio por kilo."
+
+                        });
+
+                        return;
+
+                    }
+
+                    const total = peso * precio;
+
+                    document.getElementById("totalCalculado").textContent =
+                        "S/ " + total.toFixed(2);
+
+                });
+
+            // ======================================
+            // MÉTODO DE PAGO
+            // ======================================
+
+            const radiosPago =
+                document.querySelectorAll(
+                    'input[name="metodoPago"]'
+                );
+
+            const pagoEfectivo =
+                document.getElementById("pagoEfectivo");
+
+            const contenedorQR =
+                document.getElementById("contenedorQR");
+
+            const textoQR =
+                document.getElementById("textoQR");
+
+            radiosPago.forEach((radio) => {
+
+    radio.addEventListener("change", () => {
+
+        if (radio.value === "Efectivo" && radio.checked) {
+
+            pagoEfectivo.style.display = "block";
+
+            contenedorQR.style.display = "none";
+
+        }
+
+        else if (radio.value === "Tarjeta" && radio.checked) {
+
+            pagoEfectivo.style.display = "none";
+
+            contenedorQR.style.display = "none";
+
+        }
+
+        else if (radio.value === "Yape" && radio.checked) {
+
+            pagoEfectivo.style.display = "none";
+
+            contenedorQR.style.display = "block";
+
+            textoQR.textContent =
+                "📱 Escanea este QR para pagar con Yape";
+
+        }
+
+        else if (radio.value === "Plin" && radio.checked) {
+
+            pagoEfectivo.style.display = "none";
+
+            contenedorQR.style.display = "block";
+
+            textoQR.textContent =
+                "💜 Escanea este QR para pagar con Plin";
+
+        }
+
+    });
+
+});
+
+            // ======================================
+            // CALCULAR VUELTO
+            // ======================================
+
+            document
+                .getElementById("btnCalcularVuelto")
+                .addEventListener("click", () => {
+
+                    const totalTexto =
+                        document.getElementById("totalCalculado").textContent;
+
+                    const total =
+                        Number(
+                            totalTexto.replace("S/", "").trim()
+                        );
+
+                    const recibido =
+                        Number(
+                            document.getElementById("montoRecibido").value
+                        );
+
+                    if (recibido < total) {
+
+                        Swal.fire({
+
+                            icon: "warning",
+
+                            title: "Monto insuficiente",
+
+                            text: "El monto recibido es menor que el total."
+
+                        });
+
+                        return;
+
+                    }
+
+                    const vuelto = recibido - total;
+
+                    document.getElementById("vueltoCalculado").textContent =
+                        "S/ " + vuelto.toFixed(2);
+
+                });
+
+
+            document
+                .getElementById("btnCrearPedido")
+                .addEventListener("click", async () => {
+
+                    const nombre =
+                        document.getElementById("nuevoNombre").value.trim();
+
+                    const telefono =
+                        document.getElementById("nuevoTelefono").value.trim();
+
+                    const correo =
+                        document.getElementById("nuevoCorreo").value.trim();
+
+                    const direccion =
+                        document.getElementById("nuevoDireccion").value.trim();
+
+                    const fechaRecojo =
+                        document.getElementById("nuevaFechaRecojo").value;
+
+                    const observaciones =
+                        document.getElementById("observacionesPedido").value.trim();
+
+                    const polos =
+                        Number(document.getElementById("polos").value);
+
+                    const camisas =
+                        Number(document.getElementById("camisas").value);
+
+                    const pantalones =
+                        Number(document.getElementById("pantalones").value);
+
+                    const casacas =
+                        Number(document.getElementById("casacas").value);
+
+                    const chompas =
+                        Number(document.getElementById("chompas").value);
+
+                    console.log({
+
+                        nombre,
+                        telefono,
+                        correo,
+                        direccion,
+                        fechaRecojo,
+                        observaciones,
+                        serviciosNuevoPedido,
+                        polos,
+                        camisas,
+                        pantalones,
+                        casacas,
+                        chompas
+
+                    });
+
+                    if (
+
+                        nombre === "" ||
+
+                        telefono === "" ||
+
+                        direccion === "" ||
+
+                        fechaRecojo === ""
+
+                    ) {
+
+                        Swal.fire({
+
+                            icon: "warning",
+
+                            title: "Datos incompletos",
+
+                            text: "Complete todos los datos obligatorios."
+
+                        });
+
+                        return;
+
+                    }
+
+                    if (serviciosNuevoPedido.length === 0) {
+
+                        Swal.fire({
+
+                            icon: "warning",
+
+                            title: "Seleccione un servicio",
+
+                            text: "Debe elegir al menos un servicio."
+
+                        });
+
+                        return;
+
+                    }
+
+                    if (
+
+                        polos +
+
+                        camisas +
+
+                        pantalones +
+
+                        casacas +
+
+                        chompas === 0
+
+                    ) {
+
+                        Swal.fire({
+
+                            icon: "warning",
+
+                            title: "Sin prendas",
+
+                            text: "Debe registrar al menos una prenda."
+
+                        });
+
+                        return;
+
+                    }
+
+                    //======================================
+                    // GENERAR TICKET
+                    //======================================
+
+                    const ticket =
+
+                        "T-" +
+
+                        Math.floor(
+
+                            100000 +
+
+                            Math.random() * 900000
+
+                        );
+
+
+                    //======================================
+                    // DATOS DEL PAGO
+                    //======================================
+
+                    const metodoPago = document.querySelector(
+                        'input[name="metodoPago"]:checked'
+                    ).value;
+
+                    const peso = Number(
+                        document.getElementById("pesoRopa").value
+                    );
+
+                    const precioKilo = Number(
+                        document.getElementById("precioKilo").value
+                    );
+
+                    const total = Number(
+                        document
+                            .getElementById("totalCalculado")
+                            .textContent
+                            .replace("S/", "")
+                            .trim()
+                    );
+
+                    const vuelto = Number(
+                        document
+                            .getElementById("vueltoCalculado")
+                            .textContent
+                            .replace("S/", "")
+                            .trim()
+                    );
+
+                    const clientesExistentes = await getDocs(collection(db, "clientes"));
+
+                    let clienteExiste = false;
+
+                    clientesExistentes.forEach((docu) => {
+
+                        const cliente = docu.data();
+
+                        if (
+
+                            correo !== "" &&
+
+                            cliente.correo &&
+
+                            cliente.correo.toLowerCase() === correo.toLowerCase()
+
+                        ) {
+
+                            clienteExiste = true;
+
+                        }
+
+                    });
+
+                    if (correo !== "" && !clienteExiste) {
+
+                        await addDoc(collection(db, "clientes"), {
+
+                            nombre,
+
+                            telefono,
+
+                            correo,
+
+                            fechaRegistro: new Date().toISOString()
+
+                        });
+
+                    }
+
+                    await addDoc(collection(db, "pedidos"), {
+
+                        ticket,
+
+                        tipoPedido: "presencial",
+
+                        nombre,
+
+                        telefono,
+
+                        correo,
+
+                        direccion,
+
+                        fechaRecojo,
+
+                        observaciones,
+
+                        servicios: serviciosNuevoPedido,
+
+                        polos,
+
+                        camisas,
+
+                        pantalones,
+
+                        casacas,
+
+                        chompas,
+
+                        peso,
+
+                        precioKilo,
+
+                        total,
+
+                        metodoPago,
+
+                        vuelto,
+
+                        estado: "recibido",
+
+                        pago: "pagado",
+
+                        entregado: false,
+
+                        fechaCreacion: new Date().toISOString()
+
+                    });
+
+                    Swal.fire({
+
+                        icon: "success",
+
+                        title: "Ticket generado",
+
+                        text: `Se creó correctamente el ticket ${ticket}`
+
+                    }).then(() => {
+
+                        location.reload();
+
+                    });
+
+                });
+
 
 
             document
                 .getElementById("menuPagos")
-                .addEventListener("click", () => {
+                .addEventListener("click", async () => {
 
                     ocultarTodo();
+
+                    cerrarMenuMovil();
 
                     seccionPagos.style.display = "block";
 
                     document.getElementById("listaPagos").innerHTML = "";
+
+                    const consulta = await getDocs(collection(db, "pedidos"));
+
+                    let ingresos = 0;
+                    let realizados = 0;
+                    let pendientes = 0;
+                    let hoy = 0;
+
+                    const fechaHoy = new Date().toDateString();
+
+                    consulta.forEach((docu) => {
+
+                        const pedido = docu.data();
+
+                        if (pedido.pago === "pagado") {
+
+                            realizados++;
+
+                            ingresos += Number(pedido.total || 0);
+
+                            const fechaReferencia =
+                                pedido.fechaPago ||
+                                pedido.fechaCreacion;
+
+                            if (fechaReferencia) {
+
+                                const fecha = new Date(fechaReferencia);
+
+                                if (fecha.toDateString() === fechaHoy) {
+
+                                    hoy += Number(pedido.total || 0);
+
+                                }
+
+                            }
+
+                        } else {
+
+                            pendientes++;
+
+                        }
+
+                    });
+
+                    document.getElementById("totalIngresos").textContent =
+                        "S/ " + ingresos.toFixed(2);
+
+                    document.getElementById("pagosRealizados").textContent =
+                        realizados;
+
+                    document.getElementById("pagosPendientes").textContent =
+                        pendientes;
+
+                    document.getElementById("ingresosHoy").textContent =
+                        "S/ " + hoy.toFixed(2);
 
                 });
 
@@ -2007,6 +2705,8 @@ ${(
                 .addEventListener("click", async () => {
 
                     ocultarTodo();
+
+                    cerrarMenuMovil();
 
                     seccionReclamos.style.display = "block";
 
@@ -2372,147 +3072,189 @@ style="width:95%;height:140px;"
                 });
 
             document
-    .getElementById("menuReportes")
-    .addEventListener("click", async () => {
+                .getElementById("menuReportes")
+                .addEventListener("click", async () => {
 
-        ocultarTodo();
+                    ocultarTodo();
 
-        seccionReportes.style.display = "block";
+                    cerrarMenuMovil();
 
-        const pedidos =
-            await getDocs(collection(db, "pedidos"));
+                    seccionReportes.style.display = "block";
 
-        const clientes =
-            await getDocs(collection(db, "clientes"));
+                    const pedidos =
+                        await getDocs(collection(db, "pedidos"));
 
-        const reclamos =
-            await getDocs(collection(db, "reclamos"));
+                    const clientes =
+                        await getDocs(collection(db, "clientes"));
 
-        let ingresos = 0;
-        let entregados = 0;
-        let pendientesReclamo = 0;
+                    const reclamos =
+                        await getDocs(collection(db, "reclamos"));
 
-        pedidos.forEach((docu) => {
+                    let ingresos = 0;
 
-            const pedido = docu.data();
+                    let ingresosPresencial = 0;
 
-            if (pedido.pago === "pagado") {
+                    let ingresosWeb = 0;
 
-                ingresos += Number(pedido.total || 0);
+                    let entregados = 0;
 
-            }
+                    let pendientesReclamo = 0;
 
-            if (pedido.entregado === true) {
+                    pedidos.forEach((docu) => {
 
-                entregados++;
+                        const pedido = docu.data();
 
-            }
+                        if (pedido.pago === "pagado") {
 
-        });
+                            const total = Number(pedido.total || 0);
 
-        document
-    .getElementById("btnGenerarReporte")
-    .addEventListener("click", async () => {
+                            ingresos += total;
 
-        const { jsPDF } = window.jspdf;
+                            if (pedido.tipoPedido === "presencial") {
 
-        const pdf = new jsPDF();
+                                ingresosPresencial += total;
 
-        const pedidos =
-            await getDocs(collection(db, "pedidos"));
+                            } else {
 
-        const clientes =
-            await getDocs(collection(db, "clientes"));
+                                ingresosWeb += total;
 
-        const reclamos =
-            await getDocs(collection(db, "reclamos"));
+                            }
 
-        let ingresos = 0;
-        let entregados = 0;
-        let pendientesReclamo = 0;
+                        }
 
-        pedidos.forEach((docu) => {
+                        if (pedido.entregado === true) {
 
-            const pedido = docu.data();
+                            entregados++;
 
-            if (pedido.pago === "pagado") {
+                        }
 
-                ingresos += Number(pedido.total || 0);
+                    });
 
-            }
+                    document
+                        .getElementById("btnGenerarReporte")
+                        .addEventListener("click", async () => {
 
-            if (pedido.entregado === true) {
+                            const { jsPDF } = window.jspdf;
 
-                entregados++;
+                            const pdf = new jsPDF();
 
-            }
+                            const pedidos =
+                                await getDocs(collection(db, "pedidos"));
 
-        });
+                            const clientes =
+                                await getDocs(collection(db, "clientes"));
 
-        reclamos.forEach((docu) => {
+                            const reclamos =
+                                await getDocs(collection(db, "reclamos"));
 
-            if (docu.data().estado === "Pendiente") {
+                            let ingresos = 0;
 
-                pendientesReclamo++;
+                            let ingresosPresencial = 0;
 
-            }
+                            let ingresosWeb = 0;
 
-        });
+                            let entregados = 0;
 
-        pdf.setFontSize(20);
-        pdf.text("LAVAEXPRESS LIMA", 20, 20);
+                            let pendientesReclamo = 0;
 
-        pdf.setFontSize(14);
-        pdf.text("REPORTE DEL DIA", 20, 35);
+                            pedidos.forEach((docu) => {
 
-        pdf.setFontSize(11);
+                                const pedido = docu.data();
 
-        pdf.text(
-            "Fecha: " +
-            new Date().toLocaleDateString("es-PE"),
-            20,
-            50
-        );
+                                if (pedido.pago === "pagado") {
 
-        pdf.autoTable({
+                                    const total = Number(pedido.total || 0);
 
-            startY: 60,
+                                    ingresos += total;
 
-            head: [["Concepto", "Valor"]],
+                                    if (pedido.tipoPedido === "presencial") {
 
-            body: [
+                                        ingresosPresencial += total;
 
-                ["Pedidos Totales", pedidos.size],
+                                    } else {
 
-                ["Clientes Registrados", clientes.size],
+                                        ingresosWeb += total;
 
-                ["Ingresos", "S/ " + ingresos.toFixed(2)],
+                                    }
 
-                ["Pedidos Entregados", entregados],
+                                }
 
-                ["Reclamos Pendientes", pendientesReclamo]
+                                if (pedido.entregado === true) {
 
-            ]
+                                    entregados++;
 
-        });
+                                }
 
-        pdf.save(
-            "Reporte_LavaExpress.pdf"
-        );
+                            });
 
-    });
+                            reclamos.forEach((docu) => {
 
-        reclamos.forEach((docu) => {
+                                if (docu.data().estado === "Pendiente") {
 
-            if (docu.data().estado === "Pendiente") {
+                                    pendientesReclamo++;
 
-                pendientesReclamo++;
+                                }
 
-            }
+                            });
 
-        });
+                            pdf.setFontSize(20);
+                            pdf.text("LAVAEXPRESS LIMA", 20, 20);
 
-       reporteResumen.innerHTML = `
+                            pdf.setFontSize(14);
+                            pdf.text("REPORTE DEL DIA", 20, 35);
+
+                            pdf.setFontSize(11);
+
+                            pdf.text(
+                                "Fecha: " +
+                                new Date().toLocaleDateString("es-PE"),
+                                20,
+                                50
+                            );
+
+                            pdf.autoTable({
+
+                                startY: 60,
+
+                                head: [["Concepto", "Valor"]],
+
+                                body: [
+
+                                    ["Pedidos Totales", pedidos.size],
+
+                                    ["Clientes Registrados", clientes.size],
+
+                                    ["Ingresos Presenciales", "S/ " + ingresosPresencial.toFixed(2)],
+
+                                    ["Ingresos Web", "S/ " + ingresosWeb.toFixed(2)],
+
+                                    ["Ingresos Totales", "S/ " + ingresos.toFixed(2)],
+
+                                    ["Pedidos Entregados", entregados],
+
+                                    ["Reclamos Pendientes", pendientesReclamo]
+
+                                ]
+
+                            });
+
+                            pdf.save(
+                                "Reporte_LavaExpress.pdf"
+                            );
+
+                        });
+
+                    reclamos.forEach((docu) => {
+
+                        if (docu.data().estado === "Pendiente") {
+
+                            pendientesReclamo++;
+
+                        }
+
+                    });
+
+                    reporteResumen.innerHTML = `
 
 <div class="reporte-item">
 
@@ -2532,7 +3274,23 @@ style="width:95%;height:140px;"
 
 <div class="reporte-item">
 
-    <h3>💰 Ingresos</h3>
+    <h3>🏪 Ingresos Presenciales</h3>
+
+    <span>S/ ${ingresosPresencial.toFixed(2)}</span>
+
+</div>
+
+<div class="reporte-item">
+
+    <h3>🌐 Ingresos Web</h3>
+
+    <span>S/ ${ingresosWeb.toFixed(2)}</span>
+
+</div>
+
+<div class="reporte-item">
+
+    <h3>💰 Ingresos Totales</h3>
 
     <span>S/ ${ingresos.toFixed(2)}</span>
 
@@ -2556,7 +3314,7 @@ style="width:95%;height:140px;"
 
 `;
 
-    });
+                });
 
             // ======================================
             // GRÁFICA DE PEDIDOS POR ESTADO
@@ -2661,6 +3419,8 @@ style="width:95%;height:140px;"
 
                 const listaPagos = document.getElementById("listaPagos");
 
+
+
                 listaPagos.innerHTML = `
 
 <div style="margin-bottom:20px;">
@@ -2703,9 +3463,15 @@ style="width:95%;height:140px;"
 
                         ingresos += Number(pedido.total || 0);
 
-                        if (pedido.fechaPago) {
+                        const fechaReferencia =
 
-                            const fecha = new Date(pedido.fechaPago);
+                            pedido.fechaPago ||
+
+                            pedido.fechaCreacion;
+
+                        if (fechaReferencia) {
+
+                            const fecha = new Date(fechaReferencia);
 
                             if (fecha.toDateString() === fechaHoy) {
 

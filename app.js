@@ -35,6 +35,8 @@ const provider = new GoogleAuthProvider();
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    document.body.classList.add("intro-activa");
+
     const btnLogin = document.getElementById('btnLogin');
     const btnHacerPedido = document.getElementById('btnHacerPedido');
     const btnBuscar = document.getElementById('btnBuscar');
@@ -92,6 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
             userName.textContent =
                 `Hola, ${user.displayName}`;
 
+            localStorage.setItem("introLavaExpress", "ocultar");
+
         } else {
 
             btnLogin.style.display = "inline-block";
@@ -103,6 +107,46 @@ document.addEventListener('DOMContentLoaded', () => {
             btnModificarPedido.classList.add("hidden");
 
             userName.textContent = "";
+
+            const overlay = document.getElementById("introOverlay");
+
+if (
+
+    overlay
+
+    &&
+
+    !localStorage.getItem("introLavaExpress")
+
+) {
+
+    setTimeout(() => {
+
+        document
+            .querySelector(".panel-left")
+            ?.classList.add("abrir");
+
+        document
+            .querySelector(".panel-right")
+            ?.classList.add("abrir");
+
+    }, 800);
+
+    setTimeout(() => {
+
+    overlay.classList.add("ocultar");
+
+    document.body.classList.remove("intro-activa");
+
+    document.body.classList.add("intro-finalizada");
+
+}, 2300);
+
+} else if (overlay) {
+
+    overlay.style.display = "none";
+
+}
 
         }
 
@@ -229,10 +273,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
 
-                const docSnap =
-                    await getDoc(
-                        doc(db, "pedidos", idTicket)
-                    );
+                const consulta = query(
+
+                    collection(db, "pedidos"),
+
+                    where("ticket", "==", idTicket)
+
+                );
+
+                const resultado = await getDocs(consulta);
+
+                if (resultado.empty) {
+
+                    btnDetallePedido.classList.add("hidden");
+
+                    Swal.fire({
+
+                        icon: "error",
+
+                        title: "Ticket no encontrado",
+
+                        text: "Verifica el número ingresado.",
+
+                        confirmButtonColor: "#0071e3"
+
+                    });
+
+                    return;
+
+                }
+
+                const docSnap = resultado.docs[0];
 
                 if (docSnap.exists()) {
 
@@ -511,6 +582,68 @@ ${(datos.servicios || []).length > 0
                         // ENTREGA PROGRAMADA
                         // ==========================================
 
+                        if (!datos.entregado) {
+
+    if (datos.tipoPedido === "presencial") {
+
+        Swal.fire({
+
+            icon: "success",
+
+            title: "🎉 Pedido listo",
+
+            html: `
+
+Tu pedido ya está listo.
+
+<br><br>
+
+Puedes acercarte a <b>LavaExpress Lima</b> para recoger tus prendas.
+
+<br><br>
+
+🎫 <b>Ticket:</b> ${datos.ticket}
+
+            `,
+
+            confirmButtonColor: "#22c55e"
+
+        });
+
+    } else {
+
+        Swal.fire({
+
+            icon: "info",
+
+            title: "🚚 Entrega programada",
+
+            html: `
+
+Tu pedido ya está listo.
+
+<br><br>
+
+📅 <b>Fecha:</b> ${datos.fechaEntrega || "-"}
+
+<br>
+
+🕒 <b>Hora:</b> ${datos.horaEntrega || "-"}
+
+<br>
+
+🚚 <b>Repartidor:</b> ${datos.repartidorEntrega || "Por asignar"}
+
+            `,
+
+            confirmButtonColor: "#0071e3"
+
+        });
+
+    }
+
+}
+
 
 
                     }
@@ -618,7 +751,7 @@ ${(datos.servicios || []).length > 0
                 document.getElementById(
                     'ticketInput'
                 ).value =
-                    ultimoPedido.id;
+                    ultimoPedido.data().ticket;
 
                 btnBuscar.click();
 
@@ -891,43 +1024,96 @@ Ten tus prendas listas para agilizar el servicio.
 
                         if (
 
-                            pedido.estado.toLowerCase() === "listo"
+    pedido.estado.toLowerCase() === "listo"
 
-                            &&
+    &&
 
-                            !pedido.entregado
+    !pedido.entregado
 
-                        ) {
+) {
 
-                            tarjetaProceso = `
+    if (pedido.tipoPedido === "presencial") {
 
-        <div style="
-            background:#e8f5e9;
-            padding:18px;
-            margin-bottom:12px;
-            border-radius:12px;
-            border-left:6px solid #22c55e;
-        ">
+        tarjetaProceso = `
 
-            <strong>🎫 Ticket:</strong>
-            ${pedido.ticket}
+<div style="
+background:#e8f5e9;
+padding:18px;
+margin-bottom:12px;
+border-radius:12px;
+border-left:6px solid #22c55e;
+">
 
-            <br><br>
+<strong>🎫 Ticket:</strong>
 
-            <strong>🟢 Estado:</strong>
-            Listo
+${pedido.ticket}
 
-            <br>
+<br><br>
 
-            <strong>📅 Entrega programada:</strong>
-            ${pedido.fechaEntrega || "-"}
+<strong>🟢 Estado:</strong>
 
-            <br>
+Listo para recoger
 
-            <strong>🕒 Hora estimada:</strong>
-            ${pedido.horaEntrega || "-"}
+<hr style="margin:18px 0;">
 
-            <br>
+<div style="
+background:#eefbf3;
+padding:14px;
+border-radius:10px;
+border-left:5px solid #22c55e;
+font-size:14px;
+line-height:1.7;
+">
+
+<b>🎉 ¡Tus prendas ya están listas!</b>
+
+<br><br>
+
+Puedes acercarte a <b>LavaExpress Lima</b> para recoger tu pedido.
+
+<br><br>
+
+No olvides presentar tu número de ticket:
+
+<b>${pedido.ticket}</b>
+
+</div>
+
+</div>
+
+`;
+
+    } else {
+
+        tarjetaProceso = `
+
+<div style="
+background:#e8f5e9;
+padding:18px;
+margin-bottom:12px;
+border-radius:12px;
+border-left:6px solid #22c55e;
+">
+
+<strong>🎫 Ticket:</strong>
+${pedido.ticket}
+
+<br><br>
+
+<strong>🟢 Estado:</strong>
+Listo
+
+<br>
+
+<strong>📅 Entrega programada:</strong>
+${pedido.fechaEntrega || "-"}
+
+<br>
+
+<strong>🕒 Hora estimada:</strong>
+${pedido.horaEntrega || "-"}
+
+<br>
 
 <strong>🚚 Repartidor:</strong>
 
@@ -956,11 +1142,15 @@ Cuando recibas tu pedido, revisa cuidadosamente que todas tus prendas hayan sido
 
 </div>
 
-        </div>
+</div>
 
-        `;
+`;
 
-                        }
+    }
+
+}
+
+                        
 
                         pedidosProceso.innerHTML += tarjetaProceso;
 
@@ -1194,6 +1384,8 @@ placeholder="Describe detalladamente lo sucedido...">
             try {
 
                 await signOut(auth);
+
+                localStorage.removeItem("introLavaExpress");
 
                 await Swal.fire({
                     icon: 'success',

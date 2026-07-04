@@ -448,6 +448,8 @@ document.getElementById('pedidoForm')
 
                     ticket: ticket,
 
+                    tipoPedido: "domicilio",
+
                     // Nombre escrito por el cliente
                     nombre: nombreCliente,
 

@@ -15,6 +15,12 @@
 
     <header class="admin-header">
 
+        <button id="btnMenuMovil" class="btn-menu-movil">
+
+            ☰
+
+        </button>
+
         <h1>
             <i class="fas fa-user-shield"></i>
             Panel Administrador
@@ -44,6 +50,10 @@
 
             <button id="menuPedidos">
                 📦 Pedidos
+            </button>
+
+            <button id="menuNuevoPedido">
+                ➕ Nuevo Pedido
             </button>
 
             <button id="menuRepartidores">
@@ -92,7 +102,7 @@
                 <!-- Aquí comienzan las tarjetas -->
                 <div class="dashboard-grid">
 
-<!-- ==========================
+                    <!-- ==========================
      TARJETA: PEDIDOS TOTALES
 ========================== -->
 
@@ -108,7 +118,7 @@
 
                     </div>
 
-<!-- ==========================
+                    <!-- ==========================
      TARJETA: CLIENTES
 ========================== -->
 
@@ -126,7 +136,7 @@
 
                 </div>
             </div>
-<!-- ==========================
+            <!-- ==========================
      GRÁFICA DEL DASHBOARD
 ========================== -->
 
@@ -140,7 +150,7 @@
 
 
 
-<!-- =====================================================
+            <!-- =====================================================
      SECCIÓN DE CLIENTES
      Aquí se muestran todos los clientes registrados.
 ====================================================== -->
@@ -261,6 +271,276 @@
 
             </section>
 
+            <section id="seccionNuevoPedido" style="display:none;">
+
+                <h2>➕ Registrar Nuevo Pedido</h2>
+
+                <p>
+
+                    Complete los datos del cliente que realiza su pedido directamente en la lavandería.
+
+                </p>
+
+                <div class="nuevo-pedido-card">
+
+                    <div class="grupo-formulario">
+                        <label>👤 Nombre del cliente</label>
+                        <input type="text" id="nuevoNombre">
+                    </div>
+
+                    <div class="grupo-formulario">
+                        <label>📱 Teléfono</label>
+                        <input type="text" id="nuevoTelefono">
+                    </div>
+
+                    <div class="grupo-formulario">
+                        <label>📧 Correo (Opcional)</label>
+                        <input type="email" id="nuevoCorreo">
+                    </div>
+
+                    <div class="grupo-formulario">
+                        <label>📍 Dirección</label>
+                        <input type="text" id="nuevoDireccion">
+                    </div>
+
+                    <div class="grupo-formulario">
+
+                        <label>📅 Fecha y hora de recojo</label>
+
+                        <input type="datetime-local" id="nuevaFechaRecojo">
+
+                    </div>
+
+                    <button id="btnContinuarPedido" class="btn-pdf">
+
+                        ➜ Continuar
+
+                    </button>
+
+                    <div id="segundaPartePedido" style="display:none; margin-top:40px;">
+
+                        <hr style="margin:35px 0;">
+
+                        <h3>🧺 Servicios</h3>
+
+                        <div class="servicios-grid">
+
+                            <label class="card-servicio">
+
+                                <input type="checkbox" id="servicioLavado">
+
+                                <i class="fas fa-soap"></i>
+
+                                <span>Lavado</span>
+
+                            </label>
+
+                            <label class="card-servicio">
+
+                                <input type="checkbox" id="servicioSecado">
+
+                                <i class="fas fa-wind"></i>
+
+                                <span>Secado</span>
+
+                            </label>
+
+                            <label class="card-servicio">
+
+                                <input type="checkbox" id="servicioPlanchado">
+
+                                <i class="fas fa-shirt"></i>
+
+                                <span>Planchado</span>
+
+                            </label>
+
+                        </div>
+
+                        <hr style="margin:35px 0;">
+
+                        <h3>👕 Prendas</h3>
+
+                        <label>Polos</label>
+
+                        <input type="number" id="polos" value="0">
+
+                        <br><br>
+
+                        <label>Camisas</label>
+
+                        <input type="number" id="camisas" value="0">
+
+                        <br><br>
+
+                        <label>Pantalones</label>
+
+                        <input type="number" id="pantalones" value="0">
+
+                        <br><br>
+
+                        <label>Casacas</label>
+
+                        <input type="number" id="casacas" value="0">
+
+                        <br><br>
+
+                        <label>Chompas</label>
+
+                        <input type="number" id="chompas" value="0">
+
+                        <hr style="margin:35px 0;">
+
+                        <h3>📝 Observaciones</h3>
+
+                        <textarea id="observacionesPedido" rows="4" style="width:100%;"></textarea>
+
+                        <hr style="margin:35px 0;">
+
+                        <h2>
+
+                            💰 Total:
+                            <span id="totalPedidoNuevo">
+
+                                S/ 0.00
+
+                            </span>
+
+                        </h2>
+
+                        <hr style="margin:30px 0;">
+
+                        <h3>⚖ Cálculo del Servicio</h3>
+
+                        <div class="grupo-formulario">
+
+                            <label>Peso total (kg)</label>
+
+                            <input type="number" id="pesoRopa" step="0.1" min="0" placeholder="Ejemplo: 6.5">
+
+                        </div>
+
+                        <div class="grupo-formulario">
+
+                            <label>Precio por kilo (S/)</label>
+
+                            <input type="number" id="precioKilo" value="12" min="1">
+
+                        </div>
+
+                        <button type="button" id="btnCalcularTotal" class="btn-pdf">
+
+                            🧮 Calcular Total
+
+                        </button>
+
+                        <h2 style="margin-top:25px;">
+
+                            💰 Total a pagar:
+
+                            <span id="totalCalculado">
+
+                                S/ 0.00
+
+                            </span>
+
+                        </h2>
+
+                        <hr style="margin:30px 0;">
+
+                        <h3>💳 Método de Pago</h3>
+
+                        <div class="grupo-formulario metodos-pago">
+
+                            <label class="opcion-pago">
+
+                                <span>💵 Efectivo</span>
+
+                                <input type="radio" name="metodoPago" value="Efectivo" checked>
+
+                            </label>
+
+                            <label class="opcion-pago">
+
+                                <span>📱 Yape</span>
+
+                                <input type="radio" name="metodoPago" value="Yape">
+
+                            </label>
+
+                            <label class="opcion-pago">
+
+                                <span>💜 Plin</span>
+
+                                <input type="radio" name="metodoPago" value="Plin">
+
+                            </label>
+
+                            <label class="opcion-pago">
+
+                                <span>💳 Tarjeta</span>
+
+                                <input type="radio" name="metodoPago" value="Tarjeta">
+
+                            </label>
+
+                        </div>
+
+                        <div id="contenedorQR" style="display:none; text-align:center; margin-top:25px;">
+
+                            <img id="imagenQR" src="QR.jpg" alt="QR" style="
+            width:220px;
+            max-width:100%;
+            border-radius:18px;
+            box-shadow:0 10px 25px rgba(0,0,0,.15);
+        ">
+
+                            <p id="textoQR" style="
+            margin-top:15px;
+            font-weight:bold;
+            color:#374151;
+        "></p>
+
+                        </div>
+
+                        <div id="pagoEfectivo" style="margin-top:25px;">
+
+                            <label>Monto recibido</label>
+
+                            <input type="number" id="montoRecibido" placeholder="Ingrese el monto recibido">
+
+                            <button type="button" id="btnCalcularVuelto" class="btn-pdf">
+
+                                💵 Calcular Vuelto
+
+                            </button>
+
+                            <h3>
+
+                                Vuelto:
+
+                                <span id="vueltoCalculado">
+
+                                    S/ 0.00
+
+                                </span>
+
+                            </h3>
+
+                        </div>
+
+                        <button id="btnCrearPedido" class="btn-pdf">
+
+                            ✅ Generar Ticket
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
             <section id="seccionRepartidores" style="display:none;">
 
                 <h2>🚚 Repartidores</h2>
@@ -361,41 +641,41 @@
 
                 <div id="listaReclamosHistorial" style="display:none;"></div>
 
-                
+
 
             </section>
 
             <section id="seccionReportes" class="reportes-section" style="display:none;">
 
-    <div class="reportes-header">
+                <div class="reportes-header">
 
-        <div>
+                    <div>
 
-            <h2>📊 Reportes</h2>
+                        <h2>📊 Reportes</h2>
 
-            <p>Resumen general del sistema LavaExpress.</p>
+                        <p>Resumen general del sistema LavaExpress.</p>
 
-        </div>
+                    </div>
 
-        <button id="btnGenerarReporte" class="btn-pdf">
+                    <button id="btnGenerarReporte" class="btn-pdf">
 
-            <i class="fas fa-file-pdf"></i>
+                        <i class="fas fa-file-pdf"></i>
 
-            Generar Reporte PDF
+                        Generar Reporte PDF
 
-        </button>
+                    </button>
 
-    </div>
+                </div>
 
-    <div class="reporte-card">
+                <div class="reporte-card">
 
-        <div id="reporteResumen">
+                    <div id="reporteResumen">
 
-        </div>
+                    </div>
 
-    </div>
+                </div>
 
-</section>
+            </section>
 
     </main>
 

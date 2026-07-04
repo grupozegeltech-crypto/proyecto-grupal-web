@@ -482,6 +482,8 @@ function mostrarDashboard() {
 
     seccionPedidos.style.display = "none";
 
+    document.getElementById("seccionPagos").style.display = "none";
+
 }
 
 function mostrarPedidos() {
@@ -489,6 +491,8 @@ function mostrarPedidos() {
     seccionDashboard.style.display = "none";
 
     seccionPedidos.style.display = "block";
+
+    document.getElementById("seccionPagos").style.display = "none";
 
 }
 
@@ -514,7 +518,13 @@ menuPedidos.addEventListener("click", () => {
 
 menuPagos.addEventListener("click", () => {
 
-    alert("Próximamente estará disponible el historial de pagos.");
+    seccionDashboard.style.display = "none";
+
+    seccionPedidos.style.display = "none";
+
+    document.getElementById("seccionPagos").style.display = "block";
+
+    cargarPagos();
 
 });
 
@@ -855,3 +865,246 @@ document.addEventListener("click", async (e) => {
     cargarDashboard();
 
 });
+
+// ==========================================
+// CARGAR PAGOS DEL REPARTIDOR
+// ==========================================
+
+async function cargarPagos(tipo = "historial") {
+
+    const listaPagos =
+        document.getElementById("listaPagos");
+
+    listaPagos.innerHTML = "";
+
+    const consulta =
+        await getDocs(collection(db, "pedidos"));
+
+    const correo =
+        auth.currentUser.email;
+
+    let cobradoHoy = 0;
+    let pendientes = 0;
+    let pagados = 0;
+
+    const hoy = new Date().toDateString();
+
+    consulta.forEach((docu) => {
+
+        
+
+
+        const pedido = docu.data();
+
+        // ======================================
+// PAGOS PENDIENTES
+// ======================================
+
+if (
+
+    tipo === "pendientes"
+
+    &&
+
+    pedido.repartidorRecojo === correo
+
+    &&
+
+    pedido.pago === "pendiente"
+
+) {
+
+    listaPagos.innerHTML += `
+
+<div class="pedido-card">
+
+    <h2>
+
+        🎫 ${pedido.ticket}
+
+    </h2>
+
+    <p>
+
+        <strong>👤 Cliente:</strong>
+
+        ${pedido.nombre}
+
+    </p>
+
+    <p>
+
+        <strong>📍 Dirección:</strong>
+
+        ${pedido.direccion}
+
+    </p>
+
+    <p>
+
+        <strong>💳 Método:</strong>
+
+        ${pedido.metodoPago || "-"}
+
+    </p>
+
+    <p>
+
+        <strong>💰 Total:</strong>
+
+        S/ ${Number(pedido.total || 0).toFixed(2)}
+
+    </p>
+
+    <p style="color:#d97706;font-weight:bold;">
+
+        ⏳ Pago pendiente
+
+    </p>
+
+</div>
+
+`;
+
+    pendientes++;
+
+    return;
+
+}
+
+        // Solo pagos de ESTE repartidor
+        if (pedido.repartidorPago !== correo) return;
+
+        pagados++;
+
+        const total =
+            Number(pedido.total || 0);
+
+        const fechaPago =
+            pedido.fechaPago
+                ? new Date(pedido.fechaPago)
+                : null;
+
+        if (
+
+            fechaPago &&
+
+            fechaPago.toDateString() === hoy
+
+        ) {
+
+            cobradoHoy += total;
+
+        }
+
+        listaPagos.innerHTML += `
+
+<div class="pedido-card">
+
+    <h2>
+
+        🎫 ${pedido.ticket}
+
+    </h2>
+
+    <p>
+
+        <strong>Cliente:</strong>
+
+        ${pedido.nombre}
+
+    </p>
+
+    <p>
+
+        <strong>Método:</strong>
+
+        ${pedido.metodoPago}
+
+    </p>
+
+    <p>
+
+        <strong>Total:</strong>
+
+        S/ ${total.toFixed(2)}
+
+    </p>
+
+    <p>
+
+        <strong>Fecha:</strong>
+
+        ${fechaPago
+            ? fechaPago.toLocaleDateString("es-PE")
+            : "-"}
+
+    </p>
+
+    <p style="color:green;font-weight:bold;">
+
+        ✔ Pago confirmado
+
+    </p>
+
+</div>
+
+`;
+
+    });
+
+    consulta.forEach((docu) => {
+
+        const pedido = docu.data();
+
+        if (
+
+            pedido.repartidorRecojo === correo &&
+
+            pedido.pago === "pendiente"
+
+        ) {
+
+            pendientes++;
+
+        }
+
+    });
+
+    document.getElementById("totalCobradoHoy").textContent =
+
+        "S/ " + cobradoHoy.toFixed(2);
+
+    document.getElementById("totalPendientes").textContent =
+
+        pendientes;
+
+    document.getElementById("totalPagados").textContent =
+
+        pagados;
+
+}
+
+// ==========================================
+// BOTONES DEL MÓDULO PAGOS
+// ==========================================
+
+document
+
+    .getElementById("btnPagosPendientes")
+
+    .addEventListener("click", () => {
+
+        cargarPagos("pendientes");
+
+    });
+
+document
+
+    .getElementById("btnHistorialPagos")
+
+    .addEventListener("click", () => {
+
+        cargarPagos("historial");
+
+    });

@@ -1282,3 +1282,367 @@ position:relative;
     font-size:22px;
 
 }
+
+/*==================================================
+            NUEVO PEDIDO
+==================================================*/
+
+#seccionNuevoPedido{
+
+    padding:35px;
+
+    animation:fadeIn .35s ease;
+
+}
+
+#seccionNuevoPedido h2{
+
+    font-size:34px;
+
+    color:#1e293b;
+
+    margin-bottom:8px;
+
+}
+
+#seccionNuevoPedido p{
+
+    color:#64748b;
+
+    margin-bottom:35px;
+
+}
+
+.nuevo-pedido-card{
+
+    max-width:900px;
+
+    margin:auto;
+
+    background:#ffffff;
+
+    padding:40px;
+
+    border-radius:22px;
+
+    box-shadow:0 18px 40px rgba(0,0,0,.08);
+
+    border:1px solid #edf2f7;
+
+}
+
+.grupo-formulario{
+
+    margin-bottom:25px;
+
+}
+
+.grupo-formulario label{
+
+    display:block;
+
+    font-weight:600;
+
+    color:#334155;
+
+    margin-bottom:10px;
+
+    font-size:15px;
+
+}
+
+.grupo-formulario input{
+
+    width:100%;
+
+    padding:16px;
+
+    border:2px solid #dbeafe;
+
+    border-radius:14px;
+
+    font-size:16px;
+
+    transition:.30s;
+
+    background:#f8fafc;
+
+}
+
+.grupo-formulario input:focus{
+
+    outline:none;
+
+    border-color:#2563eb;
+
+    background:white;
+
+    box-shadow:0 0 0 4px rgba(37,99,235,.12);
+
+}
+
+#btnContinuarPedido{
+
+    width:100%;
+
+    margin-top:20px;
+
+}
+
+/*==========================================
+        MENÚ RESPONSIVE CELULAR
+==========================================*/
+
+.btn-menu-movil{
+
+    display:none;
+
+    background:#0071e3;
+
+    color:white;
+
+    border:none;
+
+    width:48px;
+
+    height:48px;
+
+    border-radius:12px;
+
+    font-size:24px;
+
+    cursor:pointer;
+
+}
+
+@media (max-width:768px){
+
+    .btn-menu-movil{
+
+        display:block;
+
+    }
+
+    .admin-layout{
+
+        position:relative;
+
+    }
+
+    .sidebar{
+
+        position:fixed;
+
+        left:-280px;
+
+        top:0;
+
+        width:260px;
+
+        height:100%;
+
+        z-index:9999;
+
+        transition:.35s;
+
+        overflow-y:auto;
+
+    }
+
+    .sidebar.activo{
+
+        left:0;
+
+    }
+
+    .contenido-admin{
+
+        width:100%;
+
+        padding:20px;
+
+    }
+
+    .admin-header{
+
+        justify-content:flex-start;
+
+        gap:15px;
+
+    }
+
+}
+
+/*==========================================
+      MÉTODOS DE PAGO MODERNOS
+==========================================*/
+
+.metodos-pago{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:16px;
+
+}
+
+.opcion-pago{
+
+    display:flex !important;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    background:#f8fafc;
+
+    border:2px solid #dbeafe;
+
+    border-radius:16px;
+
+    padding:18px 22px;
+
+    cursor:pointer;
+
+    transition:.30s;
+
+}
+
+.opcion-pago:hover{
+
+    border-color:#2563eb;
+
+    background:white;
+
+    transform:translateY(-2px);
+
+    box-shadow:0 10px 25px rgba(37,99,235,.10);
+
+}
+
+.opcion-pago span{
+
+    font-size:17px;
+
+    font-weight:600;
+
+    color:#1f2937;
+
+}
+
+.opcion-pago input[type="radio"]{
+
+    width:22px;
+
+    height:22px;
+
+    cursor:pointer;
+
+}
+
+/*==========================================
+        SERVICIOS MODERNOS
+==========================================*/
+
+.servicios-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:18px;
+
+    margin:20px 0;
+
+}
+
+.card-servicio{
+
+    position:relative;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:15px;
+
+    background:#fff;
+
+    border:2px solid #dbeafe;
+
+    border-radius:18px;
+
+    padding:30px 20px;
+
+    cursor:pointer;
+
+    transition:.30s;
+
+}
+
+.card-servicio:hover{
+
+    border-color:#2563eb;
+
+    transform:translateY(-3px);
+
+    box-shadow:0 12px 28px rgba(37,99,235,.12);
+
+}
+
+.card-servicio i{
+
+    font-size:42px;
+
+    color:#0071e3;
+
+}
+
+.card-servicio span{
+
+    font-size:18px;
+
+    font-weight:600;
+
+    color:#1f2937;
+
+}
+
+.card-servicio input[type="checkbox"]{
+
+    position:absolute;
+
+    top:15px;
+
+    right:15px;
+
+    width:20px;
+
+    height:20px;
+
+}
+
+.card-servicio:has(input:checked){
+
+    background:#eef6ff;
+
+    border-color:#2563eb;
+
+    box-shadow:0 12px 28px rgba(37,99,235,.18);
+
+}
+
+@media(max-width:768px){
+
+    .servicios-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+}

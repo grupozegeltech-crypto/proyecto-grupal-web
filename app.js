@@ -231,14 +231,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
 
-                await signInWithPopup(auth, provider);
+                const resultado =
+    await signInWithPopup(auth, provider);
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Sesión iniciada',
-                    text: '¡Bienvenido a LavaExpress!',
-                    confirmButtonColor: '#0071e3'
-                });
+const usuario =
+    resultado.user;
+
+if (usuario.email === "grupo.zegel.tech@gmail.com") {
+
+    window.location.href = "admin.html";
+
+    return;
+
+}
+
+if (
+
+    usuario.email === "lavaexpressrepartidor1@gmail.com"
+
+    ||
+
+    usuario.email === "lavaexpressrepartidor2@gmail.com"
+
+) {
+
+    window.location.href = "repartidor.html";
+
+    return;
+
+}
+
+Swal.fire({
+
+    icon: 'success',
+
+    title: 'Sesión iniciada',
+
+    text: '¡Bienvenido a LavaExpress!',
+
+    confirmButtonColor: '#0071e3'
+
+});
 
             } catch (e) {
 

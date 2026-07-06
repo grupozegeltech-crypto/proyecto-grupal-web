@@ -1955,6 +1955,10 @@ ${(
                 {
                     id: "servicioPlanchado",
                     nombre: "Planchado"
+                },
+                {
+                    id: "servicioCentrifugado",
+                    nombre: "Centrifugado"
                 }
 
             ].forEach(servicio => {
@@ -2258,49 +2262,49 @@ ${(
 
             radiosPago.forEach((radio) => {
 
-    radio.addEventListener("change", () => {
+                radio.addEventListener("change", () => {
 
-        if (radio.value === "Efectivo" && radio.checked) {
+                    if (radio.value === "Efectivo" && radio.checked) {
 
-            pagoEfectivo.style.display = "block";
+                        pagoEfectivo.style.display = "block";
 
-            contenedorQR.style.display = "none";
+                        contenedorQR.style.display = "none";
 
-        }
+                    }
 
-        else if (radio.value === "Tarjeta" && radio.checked) {
+                    else if (radio.value === "Tarjeta" && radio.checked) {
 
-            pagoEfectivo.style.display = "none";
+                        pagoEfectivo.style.display = "none";
 
-            contenedorQR.style.display = "none";
+                        contenedorQR.style.display = "none";
 
-        }
+                    }
 
-        else if (radio.value === "Yape" && radio.checked) {
+                    else if (radio.value === "Yape" && radio.checked) {
 
-            pagoEfectivo.style.display = "none";
+                        pagoEfectivo.style.display = "none";
 
-            contenedorQR.style.display = "block";
+                        contenedorQR.style.display = "block";
 
-            textoQR.textContent =
-                "📱 Escanea este QR para pagar con Yape";
+                        textoQR.textContent =
+                            "📱 Escanea este QR para pagar con Yape";
 
-        }
+                    }
 
-        else if (radio.value === "Plin" && radio.checked) {
+                    else if (radio.value === "Plin" && radio.checked) {
 
-            pagoEfectivo.style.display = "none";
+                        pagoEfectivo.style.display = "none";
 
-            contenedorQR.style.display = "block";
+                        contenedorQR.style.display = "block";
 
-            textoQR.textContent =
-                "💜 Escanea este QR para pagar con Plin";
+                        textoQR.textContent =
+                            "💜 Escanea este QR para pagar con Plin";
 
-        }
+                    }
 
-    });
+                });
 
-});
+            });
 
             // ======================================
             // CALCULAR VUELTO

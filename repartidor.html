@@ -53,11 +53,11 @@
 
         </button>
 
-        <button id="cerrarSesion">
+        <button id="volverInicio">
 
-            <i class="fas fa-right-from-bracket"></i>
+            <i class="fas fa-house"></i>
 
-            Cerrar sesión
+            Volver al inicio
 
         </button>
 
@@ -109,185 +109,179 @@
 
         <section id="seccionDashboard">
 
-        <div class="dashboard-grid">
+            <div class="dashboard-grid">
 
-            <div class="dashboard-card">
+                <div class="dashboard-card">
 
-                <h3>
+                    <h3>
 
-                    📦 Pedidos Asignados
+                        📦 Pedidos Asignados
 
-                </h3>
+                    </h3>
 
-                <span id="totalPedidos">
+                    <span id="totalPedidos">
 
-                    0
+                        0
 
-                </span>
+                    </span>
+
+                </div>
+
+                <div class="dashboard-card card-pendientes">
+
+                    <h3>
+
+                        💰 Pendientes de Pago
+
+                    </h3>
+
+                    <span id="pendientesPago">
+
+                        0
+
+                    </span>
+
+                </div>
+
+                <div class="dashboard-card card-pagados">
+
+                    <h3>
+
+                        ✅ Pagados
+
+                    </h3>
+
+                    <span id="pedidosPagados">
+
+                        0
+
+                    </span>
+
+                </div>
+
+
 
             </div>
-
-            <div class="dashboard-card card-pendientes">
-
-                <h3>
-
-                    💰 Pendientes de Pago
-
-                </h3>
-
-                <span id="pendientesPago">
-
-                    0
-
-                </span>
-
-            </div>
-
-            <div class="dashboard-card card-pagados">
-
-                <h3>
-
-                    ✅ Pagados
-
-                </h3>
-
-                <span id="pedidosPagados">
-
-                    0
-
-                </span>
-
-            </div>
-
-        
-
-        </div>
 
         </section>
 
-        
 
 
 
 
-<section id="seccionPedidos">
-        <!-- =====================================================
+
+        <section id="seccionPedidos">
+            <!-- =====================================================
      PANEL DE ACCIONES
 ====================================================== -->
 
-        <div class="panel-acciones">
+            <div class="panel-acciones">
 
-            <button id="btnRecojos" class="btn-panel btn-recojos">
+                <button id="btnRecojos" class="btn-panel btn-recojos">
 
-                📦 Pedidos para Recojo
+                    📦 Pedidos para Recojo
 
-            </button>
+                </button>
 
-            <button id="btnEntregas" class="btn-panel btn-entregas">
+                <button id="btnEntregas" class="btn-panel btn-entregas">
 
-                🚚 Pedidos para Entrega
+                    🚚 Pedidos para Entrega
 
-            </button>
+                </button>
 
-        </div>
+            </div>
 
-        <!-- =====================================================
+            <!-- =====================================================
      AQUÍ SE CARGARÁN LOS PEDIDOS
 ====================================================== -->
 
-        <section id="listaPedidos">
+            <section id="listaPedidos">
 
-            <!-- repartidor.js cargará aquí las tarjetas -->
+                <!-- repartidor.js cargará aquí las tarjetas -->
+
+            </section>
 
         </section>
 
-        </section> 
-        
         <!-- =====================================================
      PAGOS DEL REPARTIDOR
 ====================================================== -->
 
-<section
-    id="seccionPagos"
-    style="display:none;">
+        <section id="seccionPagos" style="display:none;">
 
-    <div class="dashboard-grid">
+            <div class="dashboard-grid">
 
-        <div class="dashboard-card">
+                <div class="dashboard-card">
 
-            <h3>
+                    <h3>
 
-                💰 Cobrado Hoy
+                        💰 Cobrado Hoy
 
-            </h3>
+                    </h3>
 
-            <span id="totalCobradoHoy">
+                    <span id="totalCobradoHoy">
 
-                S/ 0.00
+                        S/ 0.00
 
-            </span>
+                    </span>
 
-        </div>
+                </div>
 
-        <div class="dashboard-card card-pendientes">
+                <div class="dashboard-card card-pendientes">
 
-            <h3>
+                    <h3>
 
-                📦 Pagos Pendientes
+                        📦 Pagos Pendientes
 
-            </h3>
+                    </h3>
 
-            <span id="totalPendientes">
+                    <span id="totalPendientes">
 
-                0
+                        0
 
-            </span>
+                    </span>
 
-        </div>
+                </div>
 
-        <div class="dashboard-card card-pagados">
+                <div class="dashboard-card card-pagados">
 
-            <h3>
+                    <h3>
 
-                ✅ Pagos Realizados
+                        ✅ Pagos Realizados
 
-            </h3>
+                    </h3>
 
-            <span id="totalPagados">
+                    <span id="totalPagados">
 
-                0
+                        0
 
-            </span>
+                    </span>
 
-        </div>
+                </div>
 
-    </div>
+            </div>
 
-    <div class="panel-acciones">
+            <div class="panel-acciones">
 
-    <button
-        id="btnPagosPendientes"
-        class="btn-panel btn-recojos">
+                <button id="btnPagosPendientes" class="btn-panel btn-recojos">
 
-        💰 Pagos Pendientes
+                    💰 Pagos Pendientes
 
-    </button>
+                </button>
 
-    <button
-        id="btnHistorialPagos"
-        class="btn-panel btn-entregas">
+                <button id="btnHistorialPagos" class="btn-panel btn-entregas">
 
-        📜 Historial de Pagos
+                    📜 Historial de Pagos
 
-    </button>
+                </button>
 
-</div>
+            </div>
 
-<section id="listaPagos">
+            <section id="listaPagos">
 
-</section>
+            </section>
 
-</section>
+        </section>
 
     </main>
 

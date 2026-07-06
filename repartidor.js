@@ -87,6 +87,9 @@ const menuPedidos =
 const menuPagos =
     document.getElementById("menuPagos");
 
+const btnVolverInicio =
+    document.getElementById("volverInicio");
+
 const totalPedidos =
     document.getElementById("totalPedidos");
 
@@ -891,30 +894,30 @@ async function cargarPagos(tipo = "historial") {
 
     consulta.forEach((docu) => {
 
-        
+
 
 
         const pedido = docu.data();
 
         // ======================================
-// PAGOS PENDIENTES
-// ======================================
+        // PAGOS PENDIENTES
+        // ======================================
 
-if (
+        if (
 
-    tipo === "pendientes"
+            tipo === "pendientes"
 
-    &&
+            &&
 
-    pedido.repartidorRecojo === correo
+            pedido.repartidorRecojo === correo
 
-    &&
+            &&
 
-    pedido.pago === "pendiente"
+            pedido.pago === "pendiente"
 
-) {
+        ) {
 
-    listaPagos.innerHTML += `
+            listaPagos.innerHTML += `
 
 <div class="pedido-card">
 
@@ -966,11 +969,11 @@ if (
 
 `;
 
-    pendientes++;
+            pendientes++;
 
-    return;
+            return;
 
-}
+        }
 
         // Solo pagos de ESTE repartidor
         if (pedido.repartidorPago !== correo) return;
@@ -1036,8 +1039,8 @@ if (
         <strong>Fecha:</strong>
 
         ${fechaPago
-            ? fechaPago.toLocaleDateString("es-PE")
-            : "-"}
+                ? fechaPago.toLocaleDateString("es-PE")
+                : "-"}
 
     </p>
 
@@ -1108,3 +1111,13 @@ document
         cargarPagos("historial");
 
     });
+
+// ==========================================
+// VOLVER AL INICIO
+// ==========================================
+
+btnVolverInicio.addEventListener("click", () => {
+
+    window.location.href = "index.html";
+
+});

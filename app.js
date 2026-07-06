@@ -35,7 +35,7 @@ const provider = new GoogleAuthProvider();
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    document.body.classList.add("intro-activa");
+
 
     const btnLogin = document.getElementById('btnLogin');
     const btnHacerPedido = document.getElementById('btnHacerPedido');
@@ -94,7 +94,15 @@ document.addEventListener('DOMContentLoaded', () => {
             userName.textContent =
                 `Hola, ${user.displayName}`;
 
-            localStorage.setItem("introLavaExpress", "ocultar");
+            const overlay = document.getElementById("introOverlay");
+
+            if (overlay) {
+
+                overlay.style.display = "none";
+
+            }
+
+
 
         } else {
 
@@ -110,43 +118,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const overlay = document.getElementById("introOverlay");
 
-if (
+            if (overlay) {
 
-    overlay
+                document.body.classList.add("intro-activa");
 
-    &&
+                overlay.style.display = "flex";
 
-    !localStorage.getItem("introLavaExpress")
+                setTimeout(() => {
 
-) {
+                    document
+                        .querySelector(".panel-left")
+                        ?.classList.add("abrir");
 
-    setTimeout(() => {
+                    document
+                        .querySelector(".panel-right")
+                        ?.classList.add("abrir");
 
-        document
-            .querySelector(".panel-left")
-            ?.classList.add("abrir");
+                }, 800);
 
-        document
-            .querySelector(".panel-right")
-            ?.classList.add("abrir");
+                const panelDerecho = document.querySelector(".panel-right");
 
-    }, 800);
+                panelDerecho?.addEventListener("animationend", () => {
 
-    setTimeout(() => {
+                    overlay.classList.add("ocultar");
 
-    overlay.classList.add("ocultar");
+                    document.body.classList.remove("intro-activa");
 
-    document.body.classList.remove("intro-activa");
+                    document.body.classList.add("intro-finalizada");
 
-    document.body.classList.add("intro-finalizada");
+                }, { once: true });
 
-}, 2300);
+                setTimeout(() => {
 
-} else if (overlay) {
+                    if (!overlay.classList.contains("ocultar")) {
 
-    overlay.style.display = "none";
+                        overlay.classList.add("ocultar");
 
-}
+                        document.body.classList.remove("intro-activa");
+
+                        document.body.classList.add("intro-finalizada");
+
+                    }
+
+                }, 3500);
+
+            }
 
         }
 
@@ -584,15 +600,15 @@ ${(datos.servicios || []).length > 0
 
                         if (!datos.entregado) {
 
-    if (datos.tipoPedido === "presencial") {
+                            if (datos.tipoPedido === "presencial") {
 
-        Swal.fire({
+                                Swal.fire({
 
-            icon: "success",
+                                    icon: "success",
 
-            title: "🎉 Pedido listo",
+                                    title: "🎉 Pedido listo",
 
-            html: `
+                                    html: `
 
 Tu pedido ya está listo.
 
@@ -606,19 +622,19 @@ Puedes acercarte a <b>LavaExpress Lima</b> para recoger tus prendas.
 
             `,
 
-            confirmButtonColor: "#22c55e"
+                                    confirmButtonColor: "#22c55e"
 
-        });
+                                });
 
-    } else {
+                            } else {
 
-        Swal.fire({
+                                Swal.fire({
 
-            icon: "info",
+                                    icon: "info",
 
-            title: "🚚 Entrega programada",
+                                    title: "🚚 Entrega programada",
 
-            html: `
+                                    html: `
 
 Tu pedido ya está listo.
 
@@ -636,13 +652,13 @@ Tu pedido ya está listo.
 
             `,
 
-            confirmButtonColor: "#0071e3"
+                                    confirmButtonColor: "#0071e3"
 
-        });
+                                });
 
-    }
+                            }
 
-}
+                        }
 
 
 
@@ -1024,17 +1040,17 @@ Ten tus prendas listas para agilizar el servicio.
 
                         if (
 
-    pedido.estado.toLowerCase() === "listo"
+                            pedido.estado.toLowerCase() === "listo"
 
-    &&
+                            &&
 
-    !pedido.entregado
+                            !pedido.entregado
 
-) {
+                        ) {
 
-    if (pedido.tipoPedido === "presencial") {
+                            if (pedido.tipoPedido === "presencial") {
 
-        tarjetaProceso = `
+                                tarjetaProceso = `
 
 <div style="
 background:#e8f5e9;
@@ -1083,9 +1099,9 @@ No olvides presentar tu número de ticket:
 
 `;
 
-    } else {
+                            } else {
 
-        tarjetaProceso = `
+                                tarjetaProceso = `
 
 <div style="
 background:#e8f5e9;
@@ -1146,11 +1162,11 @@ Cuando recibas tu pedido, revisa cuidadosamente que todas tus prendas hayan sido
 
 `;
 
-    }
+                            }
 
-}
+                        }
 
-                        
+
 
                         pedidosProceso.innerHTML += tarjetaProceso;
 
@@ -1385,7 +1401,7 @@ placeholder="Describe detalladamente lo sucedido...">
 
                 await signOut(auth);
 
-                localStorage.removeItem("introLavaExpress");
+
 
                 await Swal.fire({
                     icon: 'success',

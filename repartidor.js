@@ -604,6 +604,8 @@ async function cargarDashboard() {
 
             }
 
+            
+
             if (
 
                 pedido.pago === "pagado"
@@ -621,6 +623,8 @@ async function cargarDashboard() {
         }
 
     });
+
+    
 
     totalPedidos.textContent = asignados;
 
@@ -888,9 +892,11 @@ async function cargarPagos(tipo = "historial") {
 
     let cobradoHoy = 0;
     let pendientes = 0;
-    let pagados = 0;
+    let realizados = 0;
 
-    const hoy = new Date().toDateString();
+    const hoy = new Date().toLocaleDateString("es-PE");
+
+
 
     consulta.forEach((docu) => {
 
@@ -898,6 +904,21 @@ async function cargarPagos(tipo = "historial") {
 
 
         const pedido = docu.data();
+
+        if (
+            pedido.repartidorRecojo === correo &&
+            pedido.pago === "pendiente"
+        ) {
+            pendientes++;
+        }
+
+        if (
+            pedido.repartidorPago === correo &&
+            pedido.pago === "pagado"
+        ) {
+            realizados++;
+            cobradoHoy += Number(pedido.total || 0);
+        }
 
         // ======================================
         // PAGOS PENDIENTES
@@ -969,122 +990,86 @@ async function cargarPagos(tipo = "historial") {
 
 `;
 
-            pendientes++;
+
 
             return;
 
         }
 
-        // Solo pagos de ESTE repartidor
-        if (pedido.repartidorPago !== correo) return;
 
-        pagados++;
 
-        const total =
-            Number(pedido.total || 0);
+        // ======================================
+        // HISTORIAL DE PAGOS
+        // ======================================
 
-        const fechaPago =
-            pedido.fechaPago
-                ? new Date(pedido.fechaPago)
-                : null;
+        if (tipo === "historial") {
 
-        if (
+            if (pedido.repartidorPago !== correo) return;
 
-            fechaPago &&
 
-            fechaPago.toDateString() === hoy
 
-        ) {
+            const total =
+                Number(pedido.total || 0);
 
-            cobradoHoy += total;
+            const fechaPago =
+                pedido.fechaPago
+                    ? new Date(pedido.fechaPago)
+                    : null;
 
-        }
 
-        listaPagos.innerHTML += `
+
+            listaPagos.innerHTML += `
 
 <div class="pedido-card">
 
     <h2>
-
         🎫 ${pedido.ticket}
-
     </h2>
 
     <p>
-
         <strong>Cliente:</strong>
-
         ${pedido.nombre}
-
     </p>
 
     <p>
-
         <strong>Método:</strong>
-
         ${pedido.metodoPago}
-
     </p>
 
     <p>
-
         <strong>Total:</strong>
-
         S/ ${total.toFixed(2)}
-
     </p>
 
     <p>
-
         <strong>Fecha:</strong>
-
         ${fechaPago
-                ? fechaPago.toLocaleDateString("es-PE")
-                : "-"}
-
+                    ? fechaPago.toLocaleDateString("es-PE")
+                    : "-"}
     </p>
 
     <p style="color:green;font-weight:bold;">
-
         ✔ Pago confirmado
-
     </p>
 
 </div>
 
 `;
 
-    });
-
-    consulta.forEach((docu) => {
-
-        const pedido = docu.data();
-
-        if (
-
-            pedido.repartidorRecojo === correo &&
-
-            pedido.pago === "pendiente"
-
-        ) {
-
-            pendientes++;
-
         }
 
-    });
+
+
+        });
 
     document.getElementById("totalCobradoHoy").textContent =
-
         "S/ " + cobradoHoy.toFixed(2);
 
     document.getElementById("totalPendientes").textContent =
-
         pendientes;
 
     document.getElementById("totalPagados").textContent =
-
-        pagados;
+        realizados;
 
 }
 
@@ -1093,10 +1078,10 @@ async function cargarPagos(tipo = "historial") {
 // ==========================================
 
 document
-
     .getElementById("btnPagosPendientes")
-
     .addEventListener("click", () => {
+
+        cargarDashboard();
 
         cargarPagos("pendientes");
 
@@ -1107,6 +1092,8 @@ document
     .getElementById("btnHistorialPagos")
 
     .addEventListener("click", () => {
+
+        cargarDashboard();
 
         cargarPagos("historial");
 

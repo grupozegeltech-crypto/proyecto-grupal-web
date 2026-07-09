@@ -232,46 +232,46 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
 
                 const resultado =
-    await signInWithPopup(auth, provider);
+                    await signInWithPopup(auth, provider);
 
-const usuario =
-    resultado.user;
+                const usuario =
+                    resultado.user;
 
-if (usuario.email === "grupo.zegel.tech@gmail.com") {
+                if (usuario.email === "grupo.zegel.tech@gmail.com") {
 
-    window.location.href = "admin.html";
+                    window.location.href = "admin.html";
 
-    return;
+                    return;
 
-}
+                }
 
-if (
+                if (
 
-    usuario.email === "lavaexpressrepartidor1@gmail.com"
+                    usuario.email === "lavaexpressrepartidor1@gmail.com"
 
-    ||
+                    ||
 
-    usuario.email === "lavaexpressrepartidor2@gmail.com"
+                    usuario.email === "lavaexpressrepartidor2@gmail.com"
 
-) {
+                ) {
 
-    window.location.href = "repartidor.html";
+                    window.location.href = "repartidor.html";
 
-    return;
+                    return;
 
-}
+                }
 
-Swal.fire({
+                Swal.fire({
 
-    icon: 'success',
+                    icon: 'success',
 
-    title: 'Sesión iniciada',
+                    title: 'Sesión iniciada',
 
-    text: '¡Bienvenido a LavaExpress!',
+                    text: '¡Bienvenido a LavaExpress!',
 
-    confirmButtonColor: '#0071e3'
+                    confirmButtonColor: '#0071e3'
 
-});
+                });
 
             } catch (e) {
 
@@ -374,45 +374,109 @@ Swal.fire({
 
                             width: 650,
 
+                            position: "top",
+
+                            padding: "40px 0 0 0",
+
+
                             html: `
 
-        <div style="text-align:left;line-height:1.8;">
+<div style="text-align:left;font-size:15px;">
 
-            <b>🎫 Ticket:</b> ${idTicket}<br><br>
+    <p><b>🎫 Ticket:</b> ${idTicket}</p>
 
-            <b>🧺 Servicios:</b><br>
+    <hr>
 
-${(datos.servicios || []).length > 0
-                                    ? (datos.servicios || []).map(servicio =>
-                                        `✅ ${servicio}`
-                                    ).join("<br>")
-                                    : "No registrado"}
+    <p><b>🧺 Servicios</b></p>
 
-<br><br>
+    ${(datos.servicios || []).length > 0
+                                    ? (datos.servicios || [])
+                                        .map(servicio => `• ${servicio}`)
+                                        .join("<br>")
+                                    : "No registrado"
+                                }
 
-            <b>👕 Polos:</b> ${datos.polos || 0}<br>
+    <hr>
 
-            <b>👔 Camisas:</b> ${datos.camisas || 0}<br>
+    <table style="width:100%;border-collapse:collapse;">
 
-            <b>👖 Pantalones:</b> ${datos.pantalones || 0}<br>
+        <tr>
 
-            <b>🧥 Casacas:</b> ${datos.casacas || 0}<br>
+            <td>👕 Polos</td>
 
-            <b>🧶 Chompas:</b> ${datos.chompas || 0}<br><br>
+            <td style="text-align:right;">${datos.polos || 0}</td>
 
-            <b>📦 Total de prendas:</b> ${totalPrendas}<br><br>
+        </tr>
 
-            <b>📍 Dirección:</b><br>
+        <tr>
 
-            ${datos.direccion || "No registrada"}<br><br>
+            <td>👔 Camisas</td>
 
-            <b>📝 Observaciones:</b><br>
+            <td style="text-align:right;">${datos.camisas || 0}</td>
 
-            ${datos.observaciones || "Ninguna"}
+        </tr>
 
-        </div>
+        <tr>
 
-        `,
+            <td>👖 Pantalones</td>
+
+            <td style="text-align:right;">${datos.pantalones || 0}</td>
+
+        </tr>
+
+        <tr>
+
+            <td>🧥 Casacas</td>
+
+            <td style="text-align:right;">${datos.casacas || 0}</td>
+
+        </tr>
+
+        <tr>
+
+            <td>🧶 Chompas</td>
+
+            <td style="text-align:right;">${datos.chompas || 0}</td>
+
+        </tr>
+
+        <tr style="font-weight:bold;">
+
+            <td>📦 Total</td>
+
+            <td style="text-align:right;">${totalPrendas}</td>
+
+        </tr>
+
+    </table>
+
+    <hr>
+
+    <p>
+
+        <b>📍 Dirección</b><br>
+
+        ${datos.direccion || "No registrada"}
+
+    </p>
+
+    <hr>
+
+    <p>
+
+        <b>📝 Observaciones</b><br>
+
+        ${datos.observaciones || "Ninguna"}
+
+    </p>
+
+</div>
+
+`,
+
+
+
+
 
                             confirmButtonText: "Cerrar",
 

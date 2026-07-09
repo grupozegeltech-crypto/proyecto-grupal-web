@@ -30,6 +30,27 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const serviciosNuevoPedido = [];
+
+//==================================
+// PRECIOS DE LOS SERVICIOS
+//==================================
+
+const PRECIOS_SERVICIOS = {
+
+    "Lavado": 3,
+
+    "Secado": 3,
+
+    "Planchado": 2,
+
+    "Centrifugado": 1,
+
+    "Lavado en seco": 8,
+
+    "Desmanchado": 4
+
+};
+
 const auth = getAuth(app);
 
 //==================================
@@ -374,6 +395,8 @@ ${(pedido.polos || 0)
 
 <p><strong>📍 Dirección:</strong> ${pedido.direccion || "-"}</p>
 
+
+
 <p><strong>📝 Observaciones:</strong> ${pedido.observaciones || "Sin observaciones"}</p>
 
             </div>
@@ -627,6 +650,16 @@ ${(pedido.polos || 0)
                         <strong>Dirección:</strong>
                         ${pedido.direccion}
                     </p>
+
+                    <p>
+    <strong>🚚 Recojo programado:</strong>
+    ${pedido.fecha
+                        ? new Date(pedido.fecha).toLocaleString("es-PE", {
+                            dateStyle: "short",
+                            timeStyle: "short"
+                        })
+                        : "No programado"}
+</p>
                     <p>
                         <strong>Fecha de registro:</strong>
                         ${pedido.fechaCreacion
@@ -778,6 +811,16 @@ ${(
         🚚 Asignar Repartidor
     </button>
 
+    ${pedido.estado.toLowerCase() === "pendiente" ? `
+
+<button class="btn-confirmar-recepcion">
+
+    📨 Confirmar Recepción
+
+</button>
+
+` : ""}
+
     
 
     <button class="btn-eliminar">
@@ -805,6 +848,56 @@ ${(
 
                 const btnRepartidor =
                     card.querySelector(".btn-repartidor");
+
+                const btnConfirmarRecepcion =
+                    card.querySelector(".btn-confirmar-recepcion");
+
+
+                if (btnConfirmarRecepcion) {
+
+                    btnConfirmarRecepcion.addEventListener("click", async () => {
+
+                        try {
+
+                            await updateDoc(
+                                doc(db, "pedidos", documento.id),
+                                {
+                                    mensajeCliente:
+                                        "✅ Hemos recibido correctamente tu solicitud. Tu pedido será atendido en el horario que seleccionaste. Te avisaremos cuando el repartidor esté en camino."
+                                }
+                            );
+
+                            Swal.fire({
+
+                                icon: "success",
+
+                                title: "Recepción confirmada",
+
+                                text: "El cliente fue notificado correctamente."
+
+                            });
+
+                            btnConfirmarRecepcion.remove();
+
+                        }
+
+                        catch (error) {
+
+                            console.error(error);
+
+                            Swal.fire({
+
+                                icon: "error",
+
+                                title: "No se pudo enviar el mensaje."
+
+                            });
+
+                        }
+
+                    });
+
+                }
 
 
 
@@ -852,18 +945,19 @@ ${(
                         });
 
                         let correo = "";
+                        let nombreRepartidor = "";
 
                         if (resultado.isConfirmed) {
 
-                            correo =
-                                "lavaexpressrepartidor1@gmail.com";
+                            correo = "lavaexpressrepartidor1@gmail.com";
+                            nombreRepartidor = "Carlos I";
 
                         }
 
                         else if (resultado.isDenied) {
 
-                            correo =
-                                "lavaexpressrepartidor2@gmail.com";
+                            correo = "lavaexpressrepartidor2@gmail.com";
+                            nombreRepartidor = "Alejandro II";
 
                         }
 
@@ -998,9 +1092,8 @@ ${(
                                     {
 
                                         repartidorRecojo: correo,
-
+                                        nombreRepartidor: nombreRepartidor,
                                         avisoRecojo: true,
-
                                         tiempoLlegada: tiempoLlegada
 
                                     }
@@ -1017,7 +1110,8 @@ ${(
 
                                     {
 
-                                        repartidorEntrega: correo
+                                        repartidorEntrega: correo,
+                                        nombreRepartidor: nombreRepartidor
 
                                     }
 
@@ -1959,6 +2053,14 @@ ${(
                 {
                     id: "servicioCentrifugado",
                     nombre: "Centrifugado"
+                },
+                {
+                    id: "servicioLavadoSeco",
+                    nombre: "Lavado en seco"
+                },
+                {
+                    id: "servicioDesmanchado",
+                    nombre: "Desmanchado"
                 }
 
             ].forEach(servicio => {
@@ -2207,6 +2309,39 @@ ${(
 
                 });
 
+            //==================================
+            // CALCULAR COSTO DE SERVICIOS
+            //==================================
+
+            function calcularCostoServicios(servicios) {
+
+                let totalServicios = 0;
+
+                let detalle = [];
+
+                servicios.forEach(servicio => {
+
+                    const precio = PRECIOS_SERVICIOS[servicio] || 0;
+
+                    totalServicios += precio;
+
+                    detalle.push({
+                        nombre: servicio,
+                        precio: precio
+                    });
+
+                });
+
+                return {
+
+                    totalServicios,
+
+                    detalle
+
+                };
+
+            }
+
             document
                 .getElementById("btnCalcularTotal")
                 .addEventListener("click", () => {
@@ -2235,10 +2370,50 @@ ${(
 
                     }
 
-                    const total = peso * precio;
+                    const totalPeso = peso * precio;
 
-                    document.getElementById("totalCalculado").textContent =
-                        "S/ " + total.toFixed(2);
+                    const resultadoServicios =
+                        calcularCostoServicios(serviciosNuevoPedido);
+
+                    const totalFinal =
+                        totalPeso + resultadoServicios.totalServicios;
+
+                    document.getElementById("totalCalculado").innerHTML = `
+
+📦 Peso (${peso.toFixed(2)} kg × S/${precio.toFixed(2)})
+
+<br>
+
+<b>S/ ${totalPeso.toFixed(2)}</b>
+
+<br><br>
+
+🧺 Servicios
+
+<br>
+
+${resultadoServicios.detalle
+                            .map(s => `• ${s.nombre}: S/ ${s.precio.toFixed(2)}`)
+                            .join("<br>")}
+
+<br><br>
+
+<b>💰 Total servicios:
+S/ ${resultadoServicios.totalServicios.toFixed(2)}</b>
+
+<hr>
+
+<h3>
+
+💳 Total a pagar
+
+<br>
+
+S/ ${totalFinal.toFixed(2)}
+
+</h3>
+
+`;
 
                 });
 

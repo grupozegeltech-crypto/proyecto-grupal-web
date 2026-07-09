@@ -1070,6 +1070,58 @@ ${pedido.fechaRespuestaReclamo || "-"}
                         let tarjetaProceso = tarjeta;
 
                         // ==========================================
+// MENSAJE DE RECEPCIÓN
+// ==========================================
+
+if (
+
+    pedido.estado.toLowerCase() === "pendiente"
+
+    &&
+
+    pedido.mensajeCliente
+
+) {
+
+    tarjetaProceso = `
+
+<div style="
+background:#ecfdf5;
+padding:18px;
+margin-bottom:12px;
+border-radius:12px;
+border-left:6px solid #22c55e;
+">
+
+<strong>🎫 Ticket:</strong>
+
+${pedido.ticket}
+
+<br><br>
+
+<strong>🟢 Solicitud recibida</strong>
+
+<hr style="margin:15px 0;">
+
+<div style="
+background:#f0fdf4;
+padding:14px;
+border-radius:10px;
+font-size:14px;
+line-height:1.7;
+">
+
+${pedido.mensajeCliente}
+
+</div>
+
+</div>
+
+`;
+
+}
+
+                        // ==========================================
                         // REPARTIDOR EN CAMINO
                         // ==========================================
 
@@ -1107,7 +1159,7 @@ Pendiente
 
 <strong>🚚 Repartidor:</strong>
 
-${pedido.repartidorRecojo || "Por asignar"}
+${pedido.nombreRepartidor || pedido.repartidorRecojo || "Por asignar"}
 
 <br>
 
@@ -1230,7 +1282,7 @@ ${pedido.horaEntrega || "-"}
 
 <strong>🚚 Repartidor:</strong>
 
-${pedido.repartidorEntrega || "Por asignar"}
+${pedido.nombreRepartidor || pedido.repartidorEntrega || "Por asignar"}
 
 <hr style="margin:18px 0;">
 

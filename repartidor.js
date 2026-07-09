@@ -64,6 +64,26 @@ const db = getFirestore(app);
 
 const auth = getAuth(app);
 
+//==================================
+// PRECIOS DE LOS SERVICIOS
+//==================================
+
+const PRECIOS_SERVICIOS = {
+
+    "Lavado": 3,
+
+    "Secado": 3,
+
+    "Planchado": 2,
+
+    "Centrifugado": 1,
+
+    "Lavado en seco": 8,
+
+    "Desmanchado": 4
+
+};
+
 // ==========================================
 // CONTENEDOR DE PEDIDOS
 // ==========================================
@@ -604,7 +624,7 @@ async function cargarDashboard() {
 
             }
 
-            
+
 
             if (
 
@@ -624,7 +644,7 @@ async function cargarDashboard() {
 
     });
 
-    
+
 
     totalPedidos.textContent = asignados;
 
@@ -675,6 +695,42 @@ document.addEventListener("change", (e) => {
 
 });
 
+//==================================
+// CALCULAR COSTO DE SERVICIOS
+//==================================
+
+function calcularCostoServicios(servicios) {
+
+    let totalServicios = 0;
+
+    let detalle = [];
+
+    servicios.forEach(servicio => {
+
+        const precio = PRECIOS_SERVICIOS[servicio] || 0;
+
+        totalServicios += precio;
+
+        detalle.push({
+
+            nombre: servicio,
+
+            precio: precio
+
+        });
+
+    });
+
+    return {
+
+        totalServicios,
+
+        detalle
+
+    };
+
+}
+
 // ==========================================
 // CALCULAR TOTAL
 // ==========================================
@@ -706,16 +762,68 @@ document.addEventListener("click", (e) => {
 
     }
 
-    const precio = kilos * 5;
+    const precioKilo = 5;
 
-    total.textContent =
-        "S/ " + precio.toFixed(2);
+    const totalPeso = kilos * precioKilo;
+
+    // Obtener los servicios del pedido desde Firebase
+    const serviciosTexto =
+        tarjeta.querySelector("h3 + p");
+
+    const servicios = serviciosTexto
+        ? serviciosTexto.textContent
+            .split(",")
+            .map(s => s.trim())
+        : [];
+
+    const resultado =
+        calcularCostoServicios(servicios);
+
+    const totalFinal =
+        totalPeso + resultado.totalServicios;
+
+    tarjeta.dataset.total = totalFinal;
+
+    total.innerHTML = `
+
+📦 ${kilos.toFixed(2)} kg × S/${precioKilo.toFixed(2)}
+
+<br>
+
+<b>S/ ${totalPeso.toFixed(2)}</b>
+
+<br><br>
+
+🧺 Servicios
+
+<br>
+
+${resultado.detalle
+            .map(s => `• ${s.nombre}: S/ ${s.precio.toFixed(2)}`)
+            .join("<br>")}
+
+<br><br>
+
+<b>💰 Total servicios:
+S/ ${resultado.totalServicios.toFixed(2)}</b>
+
+<hr>
+
+<h3>
+
+💳 Total a pagar
+
+<br>
+
+S/ ${totalFinal.toFixed(2)}
+
+</h3>
+
+`;
 
     e.target.style.display = "none";
 
     botonPago.style.display = "block";
-
-    console.log(botonPago);
 
 });
 
@@ -733,12 +841,8 @@ document.addEventListener("click", async (e) => {
 
     const metodo = tarjeta.querySelector(".metodo-pago").value;
 
-    const total = parseFloat(
-        tarjeta.querySelector(".precio-total")
-            .textContent
-            .replace("S/", "")
-            .trim()
-    );
+    const total =
+    Number(tarjeta.dataset.total);
 
     try {
 
@@ -1060,7 +1164,7 @@ async function cargarPagos(tipo = "historial") {
 
 
 
-        });
+    });
 
     document.getElementById("totalCobradoHoy").textContent =
         "S/ " + cobradoHoy.toFixed(2);

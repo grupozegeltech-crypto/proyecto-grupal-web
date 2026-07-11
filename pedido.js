@@ -6,10 +6,12 @@ import {
     getDoc,
     setDoc,
     updateDoc,
+    addDoc,
     collection,
     getDocs,
     query,
-    where
+    where,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 import {
@@ -507,6 +509,26 @@ document.getElementById('pedidoForm')
                 }
             );
 
+            await addDoc(collection(db, "notificaciones"), {
+
+                tipo: "nuevoPedido",
+
+                ticket: ticket,
+
+                cliente: nombreCliente,
+
+                telefono: telefonoCliente,
+
+                correo: usuario?.email || "",
+
+                servicios: selectedServices,
+
+                fecha: serverTimestamp(),
+
+                leido: false
+
+            });
+
             localStorage.setItem(
                 "ultimoTicket",
                 ticket
@@ -522,12 +544,12 @@ document.getElementById('pedidoForm')
             `,
                 confirmButtonColor: '#0071e3'
 
-                }).then(() => {
+            }).then(() => {
 
-    window.location.replace("index.html");
+                window.location.replace("index.html");
             });
 
-            
+
 
             document.getElementById(
                 'pedidoForm'

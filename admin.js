@@ -9,6 +9,10 @@ import {
     updateDoc,
     deleteDoc,
     addDoc,
+    query,
+    where,
+    orderBy,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 import {
@@ -52,6 +56,193 @@ const PRECIOS_SERVICIOS = {
 };
 
 const auth = getAuth(app);
+
+// ======================================
+// NOTIFICACIONES DEL ADMINISTRADOR
+// ======================================
+
+let primeraCargaNotificaciones = true;
+
+function reproducirSonido() {
+
+    const AudioContextClass =
+        window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) return;
+
+    const ctx = new AudioContextClass();
+
+    function ding(inicio, frecuencia) {
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.value = frecuencia;
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime + inicio);
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.18,
+            ctx.currentTime + inicio + 0.01
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            ctx.currentTime + inicio + 0.20
+        );
+
+        osc.start(ctx.currentTime + inicio);
+
+        osc.stop(ctx.currentTime + inicio + 0.20);
+
+    }
+
+    ding(0.00, 950);
+
+    setTimeout(() => {
+
+        ding(0.00, 1200);
+
+    }, 280);
+
+}
+
+async function escucharNotificaciones() {
+
+    const contador =
+        document.getElementById("contadorNotificaciones");
+
+    const lista =
+        document.getElementById("listaNotificaciones");
+
+    const panel =
+        document.getElementById("panelNotificaciones");
+
+    const boton =
+        document.getElementById("btnNotificaciones");
+
+    if (!contador || !lista || !panel || !boton) {
+        return;
+    }
+
+    boton.addEventListener("click", () => {
+
+        panel.classList.toggle("mostrar");
+
+    });
+
+    const consulta = query(
+        collection(db, "notificaciones"),
+        where("leido", "==", false),
+        orderBy("fecha", "desc")
+    );
+
+    onSnapshot(consulta, (snapshot) => {
+
+        lista.innerHTML = "";
+
+        contador.textContent = snapshot.size;
+
+        if (snapshot.empty) {
+
+            contador.style.display = "none";
+
+            lista.innerHTML = `
+                <p class="sin-notificaciones">
+                    No hay notificaciones.
+                </p>
+            `;
+
+            return;
+
+        }
+
+        contador.style.display = "flex";
+
+        snapshot.forEach((docu) => {
+
+    const n = docu.data();
+
+    let tiempo = "Hace unos segundos";
+
+    if (n.fecha?.toDate) {
+
+        const ahora = new Date();
+        const fecha = n.fecha.toDate();
+
+        const segundos = Math.floor((ahora - fecha) / 1000);
+
+        if (segundos < 60) {
+
+            tiempo = "Hace unos segundos";
+
+        } else if (segundos < 3600) {
+
+            const minutos = Math.floor(segundos / 60);
+
+            tiempo = `Hace ${minutos} minuto${minutos > 1 ? "s" : ""}`;
+
+        } else if (segundos < 86400) {
+
+            const horas = Math.floor(segundos / 3600);
+
+            tiempo = `Hace ${horas} hora${horas > 1 ? "s" : ""}`;
+
+        } else {
+
+            const dias = Math.floor(segundos / 86400);
+
+            tiempo = `Hace ${dias} día${dias > 1 ? "s" : ""}`;
+
+        }
+
+    }
+
+    lista.innerHTML += `
+
+<div class="item-notificacion">
+
+    <div class="titulo-notificacion">
+
+        🧺 <strong>${n.cliente}</strong>
+
+    </div>
+
+    <div class="servicio-notificacion">
+
+        ${Array.isArray(n.servicios)
+            ? n.servicios.join(" • ")
+            : ""}
+
+    </div>
+
+    <div class="hora-notificacion">
+
+        🕒 ${tiempo}
+
+    </div>
+
+</div>
+
+`;
+
+});
+
+        if (!primeraCargaNotificaciones) {
+
+            reproducirSonido();
+
+        }
+
+        primeraCargaNotificaciones = false;
+
+    });
+
+}
 
 //==================================
 // FECHA DEL DASHBOARD
@@ -100,6 +291,37 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = "index.html";
 
             return;
+
+        }
+
+        escucharNotificaciones();
+
+        async function marcarNotificacionesLeidas() {
+
+            const consulta = await getDocs(
+                query(
+                    collection(db, "notificaciones"),
+                    where("leido", "==", false)
+                )
+            );
+
+            const promesas = [];
+
+            consulta.forEach((docu) => {
+
+                promesas.push(
+
+                    updateDoc(doc(db, "notificaciones", docu.id), {
+
+                        leido: true
+
+                    })
+
+                );
+
+            });
+
+            await Promise.all(promesas);
 
         }
 
@@ -1967,7 +2189,9 @@ ${(
 
             document
                 .getElementById("menuPedidos")
-                .addEventListener("click", () => {
+                .addEventListener("click", async () => {
+
+                    await marcarNotificacionesLeidas();
 
                     ocultarTodo();
 

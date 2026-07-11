@@ -1646,3 +1646,256 @@ position:relative;
     }
 
 }
+
+/*==========================================
+        NOTIFICACIONES ADMIN
+==========================================*/
+
+.header-actions{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+}
+
+.notificaciones{
+
+    position:relative;
+
+}
+
+.btn-notificaciones{
+
+    width:52px;
+
+    height:52px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:white;
+
+    cursor:pointer;
+
+    font-size:22px;
+
+    color:#1f2937;
+
+    box-shadow:0 8px 25px rgba(0,0,0,.10);
+
+    transition:.30s;
+
+    position:relative;
+
+}
+
+.btn-notificaciones:hover{
+
+    transform:translateY(-3px);
+
+    color:#0071e3;
+
+}
+
+.badge-notificaciones{
+
+    position:absolute;
+
+    top:-6px;
+
+    right:-6px;
+
+    min-width:24px;
+
+    height:24px;
+
+    background:#ef4444;
+
+    color:white;
+
+    border-radius:50%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:12px;
+
+    font-weight:bold;
+
+    padding:0 6px;
+
+}
+
+.panel-notificaciones{
+
+    position:absolute;
+
+    top:65px;
+
+    right:0;
+
+    width:340px;
+
+    max-height:420px;
+
+    overflow-y:auto;
+
+    background:white;
+
+    border-radius:18px;
+
+    box-shadow:0 18px 45px rgba(0,0,0,.18);
+
+    display:none;
+
+    z-index:9999;
+
+}
+
+.panel-notificaciones.mostrar{
+
+    display:block;
+
+}
+
+.panel-notificaciones h3{
+
+    padding:18px;
+
+    border-bottom:1px solid #e5e7eb;
+
+    color:#1f2937;
+
+}
+
+.item-notificacion{
+
+    padding:16px 18px;
+
+    border-bottom:1px solid #f3f4f6;
+
+    transition:.25s;
+
+    cursor:pointer;
+
+}
+
+.item-notificacion:hover{
+
+    background:#f8fafc;
+
+}
+
+.item-notificacion strong{
+
+    color:#0071e3;
+
+}
+
+.item-notificacion small{
+
+    color:#6b7280;
+
+    display:block;
+
+    margin-top:6px;
+
+}
+
+.sin-notificaciones{
+
+    padding:25px;
+
+    text-align:center;
+
+    color:#6b7280;
+
+}
+
+.titulo-notificacion{
+
+    font-size:15px;
+    font-weight:bold;
+    color:#1f2937;
+
+}
+
+.servicio-notificacion{
+
+    margin-top:6px;
+    color:#4b5563;
+    font-size:13px;
+
+}
+
+.hora-notificacion{
+
+    margin-top:8px;
+    font-size:12px;
+    color:#9ca3af;
+
+}
+
+.item-notificacion{
+
+    padding:14px;
+    border-bottom:1px solid #ececec;
+    transition:.25s;
+    cursor:pointer;
+
+}
+
+.item-notificacion:hover{
+
+    background:#f8fafc;
+
+}
+
+.titulo-notificacion{
+
+    font-size:15px;
+    font-weight:700;
+    color:#111827;
+
+}
+
+.servicio-notificacion{
+
+    margin-top:6px;
+    color:#4b5563;
+    font-size:13px;
+
+}
+
+.hora-notificacion{
+
+    margin-top:8px;
+    color:#9ca3af;
+    font-size:12px;
+
+}
+
+/* ===========================
+   NOTIFICACIONES - CELULAR
+=========================== */
+
+@media (max-width:768px){
+
+    .panel-notificaciones{
+
+        right: -110px !important;
+        left:auto !important;
+
+        width:320px !important;
+        max-width:calc(100vw - 30px);
+
+    }
+
+}

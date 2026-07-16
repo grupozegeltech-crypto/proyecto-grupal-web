@@ -2377,17 +2377,17 @@ ${(
     <br>
 
     🕒 ${pedido.repartidorRecojo === "lavaexpressrepartidor1@gmail.com"
-                                    ? (
-                                        pedido.fechaPago
-                                            ? new Date(pedido.fechaPago).toLocaleString("es-PE")
-                                            : "Pendiente"
-                                    )
-                                    : (
-                                        pedido.fechaEntregado
-                                            ? new Date(pedido.fechaEntregado).toLocaleString("es-PE")
-                                            : "Pendiente"
-                                    )
-                                }
+    ? (
+        pedido.fechaPago
+            ? new Date(pedido.fechaPago).toLocaleString("es-PE")
+            : "Pendiente"
+    )
+    : (
+        pedido.fechaEntrega && pedido.horaEntrega
+            ? `${pedido.fechaEntrega}, ${pedido.horaEntrega}`
+            : "Pendiente"
+    )
+}
 
 </div>
 
@@ -2477,17 +2477,17 @@ ${(
 <br>
 
 🕒 ${pedido.repartidorRecojo === "lavaexpressrepartidor2@gmail.com"
-                                    ? (
-                                        pedido.fechaPago
-                                            ? new Date(pedido.fechaPago).toLocaleString("es-PE")
-                                            : "Pendiente"
-                                    )
-                                    : (
-                                        pedido.fechaEntregado
-                                            ? new Date(pedido.fechaEntregado).toLocaleString("es-PE")
-                                            : "Pendiente"
-                                    )
-                                }
+    ? (
+        pedido.fechaPago
+            ? new Date(pedido.fechaPago).toLocaleString("es-PE")
+            : "Pendiente"
+    )
+    : (
+        pedido.fechaEntrega && pedido.horaEntrega
+            ? `${pedido.fechaEntrega}, ${pedido.horaEntrega}`
+            : "Pendiente"
+    )
+}
 
 </div>
 

@@ -83,6 +83,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             }
 
+            // ======================================
+            // ACTUALIZACIÓN DE LA INTERFAZ DEL USUARIO
+            // Muestra u oculta botones según el estado
+            // de autenticación, presenta el nombre del
+            // cliente y prepara la pantalla principal
+            // después del inicio de sesión.
+            // ======================================
+
             btnLogin.style.display = "none";
 
             btnMiPedido.classList.remove("hidden");
@@ -1070,20 +1078,20 @@ ${pedido.fechaRespuestaReclamo || "-"}
                         let tarjetaProceso = tarjeta;
 
                         // ==========================================
-// MENSAJE DE RECEPCIÓN
-// ==========================================
+                        // MENSAJE DE RECEPCIÓN
+                        // ==========================================
 
-if (
+                        if (
 
-    pedido.estado.toLowerCase() === "pendiente"
+                            pedido.estado.toLowerCase() === "pendiente"
 
-    &&
+                            &&
 
-    pedido.mensajeCliente
+                            pedido.mensajeCliente
 
-) {
+                        ) {
 
-    tarjetaProceso = `
+                            tarjetaProceso = `
 
 <div style="
 background:#ecfdf5;
@@ -1119,7 +1127,7 @@ ${pedido.mensajeCliente}
 
 `;
 
-}
+                        }
 
                         // ==========================================
                         // REPARTIDOR EN CAMINO

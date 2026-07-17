@@ -1526,6 +1526,60 @@ ${(
 
                         }
 
+// ======================================
+// CONFIRMAR RECEPCIÓN DE PRENDAS
+// ======================================
+
+if (
+
+    pedido.estado.toLowerCase() === "pendiente"
+
+    &&
+
+    select.value.toLowerCase() === "recibido"
+
+    &&
+
+    pedido.pago === "pagado"
+
+) {
+
+    const resultado = await Swal.fire({
+
+        icon: "question",
+
+        title: "📦 Registro de prendas recibidas",
+
+        html: `
+            <div style="text-align:left; line-height:1.7;">
+                <p>El repartidor ya confirmó el pago del pedido.</p>
+
+                <p><b>Antes de continuar, confirme que recibió y verificó correctamente las prendas entregadas por el repartidor.</b></p>
+
+                <p>Al confirmar, el estado del pedido cambiará a <b>"Recibido"</b>.</p>
+            </div>
+        `,
+
+        showCancelButton: true,
+
+        confirmButtonText: "✅ Confirmar recepción",
+
+        cancelButtonText: "Cancelar",
+
+        confirmButtonColor: "#0071e3"
+
+    });
+
+    if (!resultado.isConfirmed) {
+
+        select.value = pedido.estado;
+
+        return;
+
+    }
+
+}
+
                         try {
 
                             if (select.value === "listo") {

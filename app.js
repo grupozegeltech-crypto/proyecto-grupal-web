@@ -8,7 +8,8 @@ import {
     getDocs,
     query,
     where,
-    addDoc
+    addDoc,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import {
     getAuth,
@@ -804,32 +805,39 @@ Tu pedido ya está listo.
 
     if (btnMiPedido) {
 
-        btnMiPedido.addEventListener('click', async () => {
+        btnMiPedido.addEventListener('click', () => {
+
+            const usuario =
+                auth.currentUser;
+
+            if (!usuario) {
+                return;
+            }
+
+            // Si ya había una escucha activa, la cancelamos antes de crear otra
+            if (window.__unsubMisPedidos) {
+                window.__unsubMisPedidos();
+            }
+
+            // onSnapshot mantiene esto escuchando en tiempo real:
+            // cada vez que el admin cambie el estado o el mensaje del pedido,
+            // este callback se vuelve a ejecutar solo, sin recargar la página.
+            window.__unsubMisPedidos = onSnapshot(
+
+                query(
+                    collection(db, "pedidos"),
+
+                    where(
+                        "correo",
+                        "==",
+                        usuario.email
+                    )
+
+                ),
+
+                (pedidos) => {
 
             try {
-
-                const usuario =
-                    auth.currentUser;
-
-                if (!usuario) {
-                    return;
-                }
-
-                const pedidos =
-                    await getDocs(
-
-                        query(
-                            collection(db, "pedidos"),
-
-                            where(
-                                "correo",
-                                "==",
-                                usuario.email
-                            )
-
-                        )
-
-                    );
 
                 if (pedidos.empty) {
 
@@ -1527,6 +1535,16 @@ placeholder="Describe detalladamente lo sucedido...">
 
             }
 
+                },
+
+                (error) => {
+
+                    console.error(error);
+
+                }
+
+            );
+
         });
 
     }
@@ -1588,4 +1606,3 @@ placeholder="Describe detalladamente lo sucedido...">
 
     }
 });
-

@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     "clientes",
                     user.uid
                 );
-
+        //PARTE PRINCIPAL//
             const clienteSnap =
                 await getDoc(
                     clienteRef
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnLogin.addEventListener('click', async () => {
 
             try {
-
+  //
                 const resultado =
                     await signInWithPopup(auth, provider);
 
@@ -522,7 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             step.classList.remove('current');
 
                         });
-
+//obtiene el estado
                     const estado =
                         datos.estado
                             ? datos.estado.toLowerCase()
@@ -537,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         btnModificarPedido.classList.add("hidden");
 
                     }
-
+//ACÁ OBTIENE LOS ESTADOS
                     // ==========================
                     // PENDIENTE
                     // ==========================
@@ -818,12 +818,12 @@ Tu pedido ya está listo.
             if (window.__unsubMisPedidos) {
                 window.__unsubMisPedidos();
             }
-
+//CONSULTA SUS PEDIDOS
             // onSnapshot mantiene esto escuchando en tiempo real:
             // cada vez que el admin cambie el estado o el mensaje del pedido,
             // este callback se vuelve a ejecutar solo, sin recargar la página.
             window.__unsubMisPedidos = onSnapshot(
-
+//PRINCIPAL
                 query(
                     collection(db, "pedidos"),
 

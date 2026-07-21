@@ -370,7 +370,7 @@ document.getElementById('pedidoForm')
                 auth.currentUser;
 
             if (modoEditar === "true" && ticketEditar) {
-
+//CREACIÓN
                 await updateDoc(
 
                     doc(db, "pedidos", ticketEditar),
@@ -404,7 +404,7 @@ document.getElementById('pedidoForm')
                 return;
 
             }
-
+//verifica que no tenga otro pedido pendiente
             const pedidosPendientes =
                 await getDocs(
 
@@ -439,7 +439,7 @@ document.getElementById('pedidoForm')
                 return;
 
             }
-
+//CREACIÓN
             await setDoc(
                 doc(db, "pedidos", ticket),
                 {
@@ -533,7 +533,7 @@ document.getElementById('pedidoForm')
                 "ultimoTicket",
                 ticket
             );
-
+//SE LE DA UN TICKET
             await Swal.fire({
                 icon: 'success',
                 title: 'Pedido registrado',

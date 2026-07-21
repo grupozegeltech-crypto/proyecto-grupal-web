@@ -969,15 +969,77 @@ font-size:13px;
 
                     
 
-                    ${(
-                        pedido.estado.toLowerCase() === "pendiente"
-                            ? pedido.repartidorRecojo
-                            : pedido.repartidorEntrega
-                    )
+                    ${(() => {
 
-                        ?
+                        const estadoLower = pedido.estado.toLowerCase();
 
-                        `
+                        const repartidorActual =
+                            estadoLower === "pendiente"
+                                ? pedido.repartidorRecojo
+                                : pedido.repartidorEntrega;
+
+                        const nombreRepartidor =
+                            repartidorActual === "lavaexpressrepartidor1@gmail.com"
+                                ? "🚚 Carlos I"
+                                : "🚚 Alejandro II";
+
+                        const badgeRepartidor = `
+
+<div class="badge-repartidor">
+
+${nombreRepartidor}
+
+</div>
+
+`;
+
+                        const botonEliminar = `
+
+<button class="btn-eliminar">
+
+🗑️ Eliminar Pedido
+
+</button>
+
+`;
+
+                        // En proceso (recibido, lavando, secando, planchando):
+                        // no se puede (re)asignar repartidor, solo eliminar.
+                        if (["recibido", "lavando", "secando", "planchando"].includes(estadoLower)) {
+
+                            return `
+
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+
+${botonEliminar}
+
+</div>
+
+`;
+
+                        }
+
+                        // Ya entregado: se muestra quien entrego, pero ya no se puede reasignar.
+                        if (estadoLower === "listo" && pedido.entregado) {
+
+                            return `
+
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+
+${repartidorActual ? badgeRepartidor : ""}
+
+${botonEliminar}
+
+</div>
+
+`;
+
+                        }
+
+                        // Pendiente, o Listo sin entregar todavia: si se puede asignar/reasignar.
+                        if (repartidorActual) {
+
+                            return `
 
 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
 
@@ -987,43 +1049,17 @@ font-size:13px;
 
 </button>
 
-<div class="badge-repartidor">
+${badgeRepartidor}
 
-${(
-                            pedido.estado.toLowerCase() === "pendiente"
-                                ? pedido.repartidorRecojo
-                                : pedido.repartidorEntrega
-                        )
+${botonEliminar}
 
-                            ===
+</div>
 
-                            "lavaexpressrepartidor1@gmail.com"
-
-                            ?
-
-                            "🚚 Carlos I"
-
-                            :
-
-                            "🚚 Alejandro II"
+`;
 
                         }
 
-</div>
-
-<button class="btn-eliminar">
-
-🗑️ Eliminar Pedido
-
-</button>
-
-</div>
-
-`
-
-                        :
-
-                        `
+                        return `
 
 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
 
@@ -1033,7 +1069,7 @@ ${(
         🚚 Asignar Repartidor
     </button>
 
-    ${pedido.estado.toLowerCase() === "pendiente" ? `
+    ${estadoLower === "pendiente" ? `
 
 <button class="btn-confirmar-recepcion">
 
@@ -1043,19 +1079,15 @@ ${(
 
 ` : ""}
 
-    
-
-    <button class="btn-eliminar">
-        🗑️ Eliminar Pedido
-    </button>
+    ${botonEliminar}
 
 </div>
 
 </div>
 
-`
+`;
 
-                    }
+                    })()}
 
                 `;
 
@@ -1124,6 +1156,8 @@ ${(
 
 
 
+
+                if (btnRepartidor) {
 
                 btnRepartidor.addEventListener(
                     "click",
@@ -1417,6 +1451,8 @@ ${(
                     }
 
                 );
+
+                }
 
 
 
@@ -4081,5 +4117,3 @@ style="width:95%;height:140px;"
     });
 
 });
-
-

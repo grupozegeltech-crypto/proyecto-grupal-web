@@ -785,11 +785,14 @@ ${(pedido.polos || 0)
             let listos = 0;
             let entregados = 0;
 
+            const pedidosPorId = new Map();
 
             pedidosOrdenados.forEach((documento) => {
 
                 const pedido =
                     documento.data();
+
+                pedidosPorId.set(documento.id, pedido);
 
 
 
@@ -839,6 +842,9 @@ ${(pedido.polos || 0)
 
                 card.dataset.estado =
                     pedido.estado;
+
+                card.dataset.id =
+                    documento.id;
 
                 card.dataset.entregado =
                     pedido.entregado;
@@ -1875,6 +1881,81 @@ if (
                 listaPedidos.appendChild(card);
 
             });
+
+            // ======================================
+            // TIEMPO REAL: PAGO CONFIRMADO POR EL REPARTIDOR
+            // ======================================
+            // Sin esto, cuando el repartidor marca "Pago Realizado"
+            // en su panel, el admin recién se entera al recargar la
+            // página (F5), porque los pedidos se cargaron una sola
+            // vez con getDocs(). Este listener escucha los cambios
+            // de Firestore y actualiza el objeto "pedido" que ya
+            // está en memoria (el mismo que usa el <select> para
+            // permitir pasar de "pendiente" a "recibido"), sin
+            // necesidad de recargar ni reconstruir todo el panel.
+
+            onSnapshot(
+                collection(db, "pedidos"),
+                (snapshot) => {
+
+                    snapshot.docChanges().forEach((cambio) => {
+
+                        if (cambio.type !== "modified") return;
+
+                        const datosActualizados =
+                            cambio.doc.data();
+
+                        const pedidoLocal =
+                            pedidosPorId.get(cambio.doc.id);
+
+                        if (!pedidoLocal) return;
+
+                        if (pedidoLocal.pago === datosActualizados.pago) return;
+
+                        pedidoLocal.pago = datosActualizados.pago;
+                        pedidoLocal.metodoPago = datosActualizados.metodoPago;
+                        pedidoLocal.repartidorPago = datosActualizados.repartidorPago;
+                        pedidoLocal.fechaPago = datosActualizados.fechaPago;
+
+                        if (
+                            pedidoLocal.pago === "pagado"
+                            &&
+                            (pedidoLocal.estado || "").toLowerCase() === "pendiente"
+                        ) {
+
+                            const card = document.querySelector(
+                                `.pedido-card[data-id="${cambio.doc.id}"]`
+                            );
+
+                            if (card && !card.querySelector(".aviso-pago-confirmado")) {
+
+                                const aviso =
+                                    document.createElement("p");
+
+                                aviso.className = "aviso-pago-confirmado";
+                                aviso.style.color = "#0a8a3c";
+                                aviso.style.fontWeight = "bold";
+                                aviso.textContent =
+                                    "💰 Pago confirmado por el repartidor";
+
+                                const selectPedido =
+                                    card.querySelector(".estado-select");
+
+                                if (selectPedido) {
+                                    selectPedido.insertAdjacentElement(
+                                        "beforebegin",
+                                        aviso
+                                    );
+                                }
+
+                            }
+
+                        }
+
+                    });
+
+                }
+            );
 
             function filtrarPedidos(estado) {
 

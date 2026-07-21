@@ -1754,6 +1754,12 @@ if (
 
                             card.dataset.estado = select.value;
 
+                            if (typeof actualizarContadoresBotones === "function") {
+
+                                actualizarContadoresBotones();
+
+                            }
+
                             const estadoTexto =
                                 card.querySelector(".estado-text");
 
@@ -2143,6 +2149,98 @@ if (
 
             document.getElementById("btnEntregados").innerHTML =
                 `✅ Entregados (${entregados})`;
+
+            // ======================================
+            // ACTUALIZAR CONTADORES EN TIEMPO REAL
+            // (recalcula los botones de arriba
+            // usando el estado actual de las tarjetas
+            // ya visibles en pantalla, sin recargar)
+            // ======================================
+
+            function actualizarContadoresBotones() {
+
+                const tarjetas =
+                    listaPedidos.querySelectorAll('.pedido-card');
+
+                let pendientesActual = 0;
+                let recibidosActual = 0;
+                let lavandoActual = 0;
+                let secandoActual = 0;
+                let planchandoActual = 0;
+                let listosActual = 0;
+                let entregadosActual = 0;
+
+                tarjetas.forEach((tarjeta) => {
+
+                    const estadoTarjeta =
+                        tarjeta.dataset.estado;
+
+                    if (estadoTarjeta === "pendiente") pendientesActual++;
+
+                    if (estadoTarjeta === "recibido") recibidosActual++;
+
+                    if (estadoTarjeta === "lavando") lavandoActual++;
+
+                    if (estadoTarjeta === "secando") secandoActual++;
+
+                    if (estadoTarjeta === "planchando") planchandoActual++;
+
+                    if (estadoTarjeta === "listo") {
+
+                        if (tarjeta.dataset.entregado === "true") {
+
+                            entregadosActual++;
+
+                        } else {
+
+                            listosActual++;
+
+                        }
+
+                    }
+
+                });
+
+                if (totalPendientes)
+                    totalPendientes.textContent = pendientesActual;
+
+                if (totalRecibidos)
+                    totalRecibidos.textContent = recibidosActual;
+
+                if (totalLavando)
+                    totalLavando.textContent = lavandoActual;
+
+                if (totalSecando)
+                    totalSecando.textContent = secandoActual;
+
+                if (totalPlanchando)
+                    totalPlanchando.textContent = planchandoActual;
+
+                if (totalListos)
+                    totalListos.textContent = listosActual;
+
+                document.getElementById("btnPendientes").innerHTML =
+                    `🟡 Pendientes (${pendientesActual})`;
+
+                document.getElementById("btnRecibidos").innerHTML =
+                    `🔵 Recibidos (${recibidosActual})`;
+
+                document.getElementById("btnLavando").innerHTML =
+                    `🟣 Lavando (${lavandoActual})`;
+
+                document.getElementById("btnSecando").innerHTML =
+                    `🟠 Secando (${secandoActual})`;
+
+                document.getElementById("btnPlanchando").innerHTML =
+                    `⚫ Planchando (${planchandoActual})`;
+
+                document.getElementById("btnListos").innerHTML =
+                    `🟢 Listos (${listosActual})`;
+
+                document.getElementById("btnEntregados").innerHTML =
+                    `✅ Entregados (${entregadosActual})`;
+
+            }
 
             //==============================
             // MENÚ LATERAL

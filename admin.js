@@ -2909,38 +2909,36 @@ if (
 
                     document.getElementById("totalCalculado").innerHTML = `
 
-📦 Peso (${peso.toFixed(2)} kg × S/${precio.toFixed(2)})
+<div class="resumen-fila">
+    <span class="resumen-etiqueta">📦 Peso (${peso.toFixed(2)} kg × S/ ${precio.toFixed(2)})</span>
+    <span class="resumen-valor">S/ ${totalPeso.toFixed(2)}</span>
+</div>
 
-<br>
+${resultadoServicios.detalle.length > 0 ? `
+<div class="resumen-seccion">
 
-<b>S/ ${totalPeso.toFixed(2)}</b>
+    <p class="resumen-subtitulo">🧺 Servicios</p>
 
-<br><br>
+    ${resultadoServicios.detalle
+                            .map(s => `
+    <div class="resumen-fila resumen-fila--servicio">
+        <span class="resumen-etiqueta">${s.nombre}</span>
+        <span class="resumen-valor">S/ ${s.precio.toFixed(2)}</span>
+    </div>`)
+                            .join("")}
 
-🧺 Servicios
+</div>
 
-<br>
+<div class="resumen-fila resumen-fila--subtotal">
+    <span>💰 Total servicios</span>
+    <span>S/ ${resultadoServicios.totalServicios.toFixed(2)}</span>
+</div>
+` : ""}
 
-${resultadoServicios.detalle
-                            .map(s => `• ${s.nombre}: S/ ${s.precio.toFixed(2)}`)
-                            .join("<br>")}
-
-<br><br>
-
-<b>💰 Total servicios:
-S/ ${resultadoServicios.totalServicios.toFixed(2)}</b>
-
-<hr>
-
-<h3>
-
-💳 Total a pagar
-
-<br>
-
-S/ ${totalFinal.toFixed(2)}
-
-</h3>
+<div class="resumen-total-final">
+    <span>💳 Total a pagar</span>
+    <span>S/ ${totalFinal.toFixed(2)}</span>
+</div>
 
 `;
 

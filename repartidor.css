@@ -360,11 +360,129 @@ body{
 
 .total-pagar{
 
-    color:#16a34a !important;
+    color:#111827;
 
-    font-size:34px;
+    font-size:20px;
+
+    font-weight:700;
+
+    margin-top:14px;
+
+}
+
+.total-pagar .precio-total{
+
+    color:#16a34a;
+
+    font-size:26px;
+
+    font-weight:800;
+
+}
+
+/* ==========================================
+   RESUMEN DE PAGO (desglose ordenado)
+========================================== */
+
+.resumen-pago{
 
     margin-top:10px;
+
+    padding:16px 18px;
+
+    background:#f9fafb;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:14px;
+
+}
+
+.fila-pago{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:12px;
+
+    font-size:15px;
+
+    color:#374151;
+
+    padding:5px 0;
+
+}
+
+.fila-pago strong{
+
+    color:#111827;
+
+    white-space:nowrap;
+
+}
+
+.fila-subtotal{
+
+    margin-top:4px;
+
+    padding-top:8px;
+
+    border-top:1px dashed #d1d5db;
+
+}
+
+.subtitulo-pago{
+
+    font-size:12px;
+
+    font-weight:700;
+
+    letter-spacing:.04em;
+
+    text-transform:uppercase;
+
+    color:#6b7280;
+
+    margin:12px 0 4px;
+
+}
+
+.total-final-pago{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-top:10px;
+
+    padding-top:12px;
+
+    border-top:2px solid #16a34a;
+
+}
+
+.total-final-pago span:first-child{
+
+    font-size:15px;
+
+    font-weight:700;
+
+    color:#111827;
+
+}
+
+.total-final-pago span:last-child{
+
+    font-size:24px;
+
+    font-weight:800;
+
+    color:#16a34a;
 
 }
 
@@ -553,4 +671,3 @@ body{
     background:linear-gradient(135deg,#1d4ed8,#1e40af);
 
 }
-

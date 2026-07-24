@@ -787,7 +787,7 @@ ${(pedido.polos || 0)
 
             const pedidosPorId = new Map();
 
-            pedidosOrdenados.forEach((documento) => {
+            function crearTarjetaPedido(documento) {
 
                 const pedido =
                     documento.data();
@@ -1878,7 +1878,13 @@ if (
                     }
                 );
 
-                listaPedidos.appendChild(card);
+                return card;
+
+            }
+
+            pedidosOrdenados.forEach((documento) => {
+
+                listaPedidos.appendChild(crearTarjetaPedido(documento));
 
             });
 
@@ -1899,6 +1905,36 @@ if (
                 (snapshot) => {
 
                     snapshot.docChanges().forEach((cambio) => {
+
+                        // ======================================
+                        // TIEMPO REAL: PEDIDO NUEVO
+                        // ======================================
+                        // Sin esto, cuando el cliente hace un pedido,
+                        // la notificación sí llega al instante, pero
+                        // el contador de "Pendientes" y la tarjeta
+                        // del pedido recién aparecían al hacer F5,
+                        // porque los pedidos se cargaron una sola vez
+                        // con getDocs(). Aquí se crea la tarjeta y se
+                        // refrescan los contadores apenas Firestore
+                        // avisa que se agregó un pedido nuevo.
+                        if (cambio.type === "added") {
+
+                            if (pedidosPorId.has(cambio.doc.id)) return;
+
+                            const nuevaTarjeta =
+                                crearTarjetaPedido(cambio.doc);
+
+                            listaPedidos.prepend(nuevaTarjeta);
+
+                            if (typeof actualizarContadoresBotones === "function") {
+
+                                actualizarContadoresBotones();
+
+                            }
+
+                            return;
+
+                        }
 
                         if (cambio.type !== "modified") return;
 

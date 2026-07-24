@@ -786,38 +786,34 @@ document.addEventListener("click", (e) => {
 
     total.innerHTML = `
 
-📦 ${kilos.toFixed(2)} kg × S/${precioKilo.toFixed(2)}
+<div class="resumen-pago">
 
-<br>
+    <div class="fila-pago">
+        <span>📦 Peso (${kilos.toFixed(2)} kg × S/${precioKilo.toFixed(2)})</span>
+        <strong>S/ ${totalPeso.toFixed(2)}</strong>
+    </div>
 
-<b>S/ ${totalPeso.toFixed(2)}</b>
+    <div class="subtitulo-pago">🧺 Servicios</div>
 
-<br><br>
+    ${resultado.detalle
+        .map(s => `
+    <div class="fila-pago">
+        <span>${s.nombre}</span>
+        <strong>S/ ${s.precio.toFixed(2)}</strong>
+    </div>`)
+        .join("")}
 
-🧺 Servicios
+    <div class="fila-pago fila-subtotal">
+        <span>💰 Total servicios</span>
+        <strong>S/ ${resultado.totalServicios.toFixed(2)}</strong>
+    </div>
 
-<br>
+    <div class="total-final-pago">
+        <span>💳 Total a pagar</span>
+        <span>S/ ${totalFinal.toFixed(2)}</span>
+    </div>
 
-${resultado.detalle
-            .map(s => `• ${s.nombre}: S/ ${s.precio.toFixed(2)}`)
-            .join("<br>")}
-
-<br><br>
-
-<b>💰 Total servicios:
-S/ ${resultado.totalServicios.toFixed(2)}</b>
-
-<hr>
-
-<h3>
-
-💳 Total a pagar
-
-<br>
-
-S/ ${totalFinal.toFixed(2)}
-
-</h3>
+</div>
 
 `;
 

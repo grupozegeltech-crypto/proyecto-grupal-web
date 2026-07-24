@@ -2907,6 +2907,12 @@ if (
                     const totalFinal =
                         totalPeso + resultadoServicios.totalServicios;
 
+                    document.getElementById("totalCalculado").dataset.total =
+                        totalFinal;
+
+                    document.getElementById("totalPedidoNuevo").textContent =
+                        "S/ " + totalFinal.toFixed(2);
+
                     document.getElementById("totalCalculado").innerHTML = `
 
 <div class="resumen-fila">
@@ -3016,18 +3022,47 @@ ${resultadoServicios.detalle.length > 0 ? `
                 .getElementById("btnCalcularVuelto")
                 .addEventListener("click", () => {
 
-                    const totalTexto =
-                        document.getElementById("totalCalculado").textContent;
-
                     const total =
                         Number(
-                            totalTexto.replace("S/", "").trim()
+                            document.getElementById("totalCalculado").dataset.total
                         );
+
+                    if (!total || total <= 0) {
+
+                        Swal.fire({
+
+                            icon: "warning",
+
+                            title: "Falta calcular el total",
+
+                            text: "Primero ingresa el peso y presiona \"Calcular Total\"."
+
+                        });
+
+                        return;
+
+                    }
 
                     const recibido =
                         Number(
                             document.getElementById("montoRecibido").value
                         );
+
+                    if (!recibido || recibido <= 0) {
+
+                        Swal.fire({
+
+                            icon: "warning",
+
+                            title: "Monto recibido inválido",
+
+                            text: "Ingresa el monto recibido por el cliente."
+
+                        });
+
+                        return;
+
+                    }
 
                     if (recibido < total) {
 
@@ -3211,11 +3246,7 @@ ${resultadoServicios.detalle.length > 0 ? `
                     );
 
                     const total = Number(
-                        document
-                            .getElementById("totalCalculado")
-                            .textContent
-                            .replace("S/", "")
-                            .trim()
+                        document.getElementById("totalCalculado").dataset.total
                     );
 
                     const vuelto = Number(
@@ -3224,7 +3255,7 @@ ${resultadoServicios.detalle.length > 0 ? `
                             .textContent
                             .replace("S/", "")
                             .trim()
-                    );
+                    ) || 0;
 
                     const clientesExistentes = await getDocs(collection(db, "clientes"));
 

@@ -1980,3 +1980,106 @@ position:relative;
     font-size:17px;
     font-weight:700;
 }
+
+/* ===========================
+   PAGO EN EFECTIVO / VUELTO
+=========================== */
+
+.tarjeta-efectivo{
+    margin-top:25px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px 22px;
+    box-shadow:0 2px 10px rgba(0,0,0,.04);
+}
+
+.tarjeta-efectivo .grupo-formulario{
+    margin-bottom:16px;
+}
+
+.tarjeta-efectivo #btnCalcularVuelto{
+    width:100%;
+}
+
+.resumen-vuelto-final{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-top:16px;
+    padding:14px 16px;
+    background:linear-gradient(135deg,#16a34a,#15803d);
+    color:#fff;
+    border-radius:12px;
+    font-size:17px;
+    font-weight:700;
+}
+
+/* ===========================
+   PRENDAS (tarjetas con icono)
+=========================== */
+
+.grid-prendas{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));
+    gap:14px;
+    margin-top:16px;
+}
+
+.prenda-card{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:8px;
+    background:#f8fafc;
+    border:2px solid var(--border);
+    border-radius:16px;
+    padding:18px 12px 16px;
+    transition:.25s;
+}
+
+.prenda-card:hover{
+    border-color:#bfdbfe;
+    background:#fff;
+    box-shadow:0 4px 12px rgba(0,0,0,.06);
+}
+
+.prenda-card:focus-within{
+    border-color:var(--primary);
+    background:#fff;
+    box-shadow:0 0 0 4px rgba(37,99,235,.12);
+}
+
+.prenda-icono{
+    font-size:28px;
+    line-height:1;
+}
+
+.prenda-card label{
+    font-weight:600;
+    color:#334155;
+    font-size:14px;
+    margin:0;
+}
+
+.prenda-card input{
+    width:100%;
+    max-width:80px;
+    text-align:center;
+    padding:10px 6px;
+    border:2px solid #dbeafe;
+    border-radius:10px;
+    font-size:16px;
+    font-weight:700;
+    color:var(--primary-dark);
+    background:#fff;
+    transition:.25s;
+}
+
+.prenda-card input:focus{
+    outline:none;
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(37,99,235,.12);
+}

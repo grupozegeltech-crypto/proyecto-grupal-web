@@ -430,33 +430,39 @@
 
                         <h3>👕 Prendas</h3>
 
-                        <label>Polos</label>
+                        <div class="grid-prendas">
 
-                        <input type="number" id="polos" value="0">
+                            <div class="prenda-card">
+                                <span class="prenda-icono">👕</span>
+                                <label for="polos">Polos</label>
+                                <input type="number" id="polos" value="0" min="0">
+                            </div>
 
-                        <br><br>
+                            <div class="prenda-card">
+                                <span class="prenda-icono">👔</span>
+                                <label for="camisas">Camisas</label>
+                                <input type="number" id="camisas" value="0" min="0">
+                            </div>
 
-                        <label>Camisas</label>
+                            <div class="prenda-card">
+                                <span class="prenda-icono">👖</span>
+                                <label for="pantalones">Pantalones</label>
+                                <input type="number" id="pantalones" value="0" min="0">
+                            </div>
 
-                        <input type="number" id="camisas" value="0">
+                            <div class="prenda-card">
+                                <span class="prenda-icono">🧥</span>
+                                <label for="casacas">Casacas</label>
+                                <input type="number" id="casacas" value="0" min="0">
+                            </div>
 
-                        <br><br>
+                            <div class="prenda-card">
+                                <span class="prenda-icono">🧶</span>
+                                <label for="chompas">Chompas</label>
+                                <input type="number" id="chompas" value="0" min="0">
+                            </div>
 
-                        <label>Pantalones</label>
-
-                        <input type="number" id="pantalones" value="0">
-
-                        <br><br>
-
-                        <label>Casacas</label>
-
-                        <input type="number" id="casacas" value="0">
-
-                        <br><br>
-
-                        <label>Chompas</label>
-
-                        <input type="number" id="chompas" value="0">
+                        </div>
 
                         <hr style="margin:35px 0;">
 
@@ -476,6 +482,9 @@
                             </span>
 
                         </h2>
+
+                        <!-- Este total se actualiza automáticamente al presionar "Calcular Total" -->
+
 
                         <hr style="margin:30px 0;">
 
@@ -570,11 +579,15 @@
 
                         </div>
 
-                        <div id="pagoEfectivo" style="margin-top:25px;">
+                        <div id="pagoEfectivo" class="tarjeta-efectivo">
 
-                            <label>Monto recibido</label>
+                            <div class="grupo-formulario">
 
-                            <input type="number" id="montoRecibido" placeholder="Ingrese el monto recibido">
+                                <label>💵 Monto recibido</label>
+
+                                <input type="number" id="montoRecibido" placeholder="Ingrese el monto recibido" min="0" step="0.10">
+
+                            </div>
 
                             <button type="button" id="btnCalcularVuelto" class="btn-pdf">
 
@@ -582,17 +595,10 @@
 
                             </button>
 
-                            <h3>
-
-                                Vuelto:
-
-                                <span id="vueltoCalculado">
-
-                                    S/ 0.00
-
-                                </span>
-
-                            </h3>
+                            <div class="resumen-vuelto-final">
+                                <span>💸 Vuelto</span>
+                                <span id="vueltoCalculado">S/ 0.00</span>
+                            </div>
 
                         </div>
 

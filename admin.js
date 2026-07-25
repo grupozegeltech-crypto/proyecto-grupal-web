@@ -871,7 +871,7 @@ ${(pedido.polos || 0)
 
                     <p>
                         <strong>Correo:</strong>
-                        ${pedido.correo}
+                        ${pedido.correo && pedido.correo.trim() !== "" ? pedido.correo : "Sin correo"}
                     </p>
 
                     <p>
@@ -880,13 +880,24 @@ ${(pedido.polos || 0)
                     </p>
 
                     <p>
-    <strong>🚚 Recojo programado:</strong>
-    ${pedido.fecha
-                        ? new Date(pedido.fecha).toLocaleString("es-PE", {
+    <strong>${pedido.tipoPedido === "presencial" ? "🎒 Entrega programada:" : "🚚 Recojo programado:"}</strong>
+    ${(() => {
+                        const fechaProgramada =
+                            pedido.tipoPedido === "presencial"
+                                ? pedido.fechaRecojo
+                                : pedido.fecha;
+
+                        if (!fechaProgramada) {
+                            return pedido.tipoPedido === "presencial"
+                                ? "No programada"
+                                : "No programado";
+                        }
+
+                        return new Date(fechaProgramada).toLocaleString("es-PE", {
                             dateStyle: "short",
                             timeStyle: "short"
-                        })
-                        : "No programado"}
+                        });
+                    })()}
 </p>
                     <p>
                         <strong>Fecha de registro:</strong>
@@ -1009,13 +1020,30 @@ ${nombreRepartidor}
 
 `;
 
+                        // Pedido presencial, ya está "Listo" pero aún no se marcó como entregado:
+                        // el admin necesita poder cerrarlo manualmente (no hay repartidor de por medio).
+                        const botonEntregadoPresencial =
+                            (estadoLower === "listo" &&
+                                pedido.tipoPedido === "presencial" &&
+                                !pedido.entregado)
+                                ? `
+
+<button class="btn-entregado-presencial">
+
+✅ Entregado
+
+</button>
+
+`
+                                : "";
+
                         // En proceso (recibido, lavando, secando, planchando):
                         // no se puede (re)asignar repartidor, solo eliminar.
                         if (["recibido", "lavando", "secando", "planchando"].includes(estadoLower)) {
 
                             return `
 
-<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+<div class="acciones-pedido" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
 
 ${botonEliminar}
 
@@ -1030,7 +1058,7 @@ ${botonEliminar}
 
                             return `
 
-<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+<div class="acciones-pedido" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
 
 ${repartidorActual ? badgeRepartidor : ""}
 
@@ -1047,7 +1075,7 @@ ${botonEliminar}
 
                             return `
 
-<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+<div class="acciones-pedido" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
 
 <button class="btn-repartidor">
 
@@ -1056,6 +1084,8 @@ ${botonEliminar}
 </button>
 
 ${badgeRepartidor}
+
+${botonEntregadoPresencial}
 
 ${botonEliminar}
 
@@ -1067,13 +1097,15 @@ ${botonEliminar}
 
                         return `
 
-<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+<div class="acciones-pedido" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
 
 <div class="botones-admin">
 
-    <button class="btn-repartidor">
+    ${pedido.tipoPedido === "presencial" ? "" : `
+<button class="btn-repartidor">
         🚚 Asignar Repartidor
     </button>
+`}
 
     ${estadoLower === "pendiente" ? `
 
@@ -1084,6 +1116,8 @@ ${botonEliminar}
 </button>
 
 ` : ""}
+
+    ${botonEntregadoPresencial}
 
     ${botonEliminar}
 
@@ -1111,6 +1145,73 @@ ${botonEliminar}
 
                 const btnConfirmarRecepcion =
                     card.querySelector(".btn-confirmar-recepcion");
+
+                const btnEntregadoPresencial =
+                    card.querySelector(".btn-entregado-presencial");
+
+                async function marcarEntregadoPresencial(boton) {
+
+                    const resultado = await Swal.fire({
+
+                        icon: "question",
+                        title: "¿Confirmar entrega?",
+                        html: `Confirme que el cliente <b>${pedido.nombre}</b> ya recogió su ropa en tienda (Ticket ${pedido.ticket}).`,
+                        showCancelButton: true,
+                        confirmButtonText: "✅ Sí, ya se entregó",
+                        cancelButtonText: "Cancelar",
+                        confirmButtonColor: "#16A34A"
+
+                    });
+
+                    if (!resultado.isConfirmed) return;
+
+                    try {
+
+                        await updateDoc(
+                            doc(db, "pedidos", documento.id),
+                            {
+                                entregado: true
+                            }
+                        );
+
+                        // Reflejamos el cambio en la tarjeta al instante,
+                        // sin necesitar recargar la página.
+                        pedido.entregado = true;
+                        card.dataset.entregado = "true";
+                        card.style.display = "none";
+
+                        if (typeof actualizarContadoresBotones === "function") {
+                            actualizarContadoresBotones();
+                        }
+
+                        Swal.fire({
+                            icon: "success",
+                            title: "Pedido entregado",
+                            text: `El ticket ${pedido.ticket} se movió a Entregados.`
+                        });
+
+                    } catch (error) {
+
+                        console.error(error);
+
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "No se pudo marcar el pedido como entregado."
+                        });
+
+                    }
+
+                }
+
+                if (btnEntregadoPresencial) {
+
+                    btnEntregadoPresencial.addEventListener(
+                        "click",
+                        () => marcarEntregadoPresencial(btnEntregadoPresencial)
+                    );
+
+                }
 
 
                 if (btnConfirmarRecepcion) {
@@ -1759,6 +1860,45 @@ if (
                             pedido.estado = select.value;
 
                             card.dataset.estado = select.value;
+
+                            // Un pedido presencial que recién llega a "Listo" necesita
+                            // el botón de Entregado al instante, sin recargar la página.
+                            if (
+                                select.value === "listo" &&
+                                pedido.tipoPedido === "presencial" &&
+                                !pedido.entregado
+                            ) {
+
+                                const contenedorAcciones =
+                                    card.querySelector(".acciones-pedido");
+
+                                if (
+                                    contenedorAcciones &&
+                                    !contenedorAcciones.querySelector(".btn-entregado-presencial")
+                                ) {
+
+                                    const btnEntregadoNuevo =
+                                        document.createElement("button");
+
+                                    btnEntregadoNuevo.className =
+                                        "btn-entregado-presencial";
+
+                                    btnEntregadoNuevo.textContent =
+                                        "✅ Entregado";
+
+                                    contenedorAcciones.insertBefore(
+                                        btnEntregadoNuevo,
+                                        contenedorAcciones.firstChild
+                                    );
+
+                                    btnEntregadoNuevo.addEventListener(
+                                        "click",
+                                        () => marcarEntregadoPresencial(btnEntregadoNuevo)
+                                    );
+
+                                }
+
+                            }
 
                             if (typeof actualizarContadoresBotones === "function") {
 
@@ -4226,15 +4366,24 @@ style="width:95%;height:140px;"
 
 <p><strong>👤 Cliente:</strong> ${pedido.nombre}</p>
 
-<p><strong>📧 Correo:</strong> ${pedido.correo}</p>
+<p><strong>📧 Correo:</strong> ${pedido.correo && pedido.correo.trim() !== "" ? pedido.correo : "Sin correo"}</p>
 
-<p><strong>🚚 Repartidor:</strong> ${pedido.repartidorPago}</p>
+${pedido.tipoPedido === "presencial" ? "" : `<p><strong>🚚 Repartidor:</strong> ${pedido.repartidorPago}</p>`}
 
 <p><strong>💳 Método:</strong> ${pedido.metodoPago}</p>
 
 <p><strong>💰 Total:</strong> S/ ${pedido.total}</p>
 
-<p><strong>📅 Fecha:</strong> ${new Date(pedido.fechaPago).toLocaleString("es-PE")}</p>
+<p><strong>📅 Fecha:</strong> ${(() => {
+                            const fechaPagoReferencia =
+                                pedido.tipoPedido === "presencial"
+                                    ? pedido.fechaCreacion
+                                    : pedido.fechaPago;
+
+                            return fechaPagoReferencia
+                                ? new Date(fechaPagoReferencia).toLocaleString("es-PE")
+                                : "Sin fecha";
+                        })()}</p>
 
 </div>
 

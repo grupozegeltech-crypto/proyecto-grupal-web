@@ -885,6 +885,38 @@ position:relative;
 
 }
 
+.btn-entregado-presencial{
+
+    border:none;
+
+    padding:13px 24px;
+
+    border-radius:14px;
+
+    cursor:pointer;
+
+    color:#fff;
+
+    font-size:15px;
+
+    font-weight:700;
+
+    background:linear-gradient(135deg,#16a34a,#22c55e);
+
+    box-shadow:0 10px 25px rgba(22,163,74,.28);
+
+    transition:.25s;
+
+}
+
+.btn-entregado-presencial:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:0 15px 30px rgba(22,163,74,.35);
+
+}
+
 /* Cuando ya está asignado */
 
 .btn-repartidor.asignado{
